@@ -1,0 +1,39 @@
+{
+  "name": "kitabi-system",
+  "version": "1.0.0",
+  "description": "AI-powered book social platform - Full System",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd web-app && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd web-app && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../web-app && npm install",
+    "build": "cd web-app && npm run build",
+    "test": "cd backend && npm test",
+    "clean": "rimraf backend/node_modules web-app/node_modules node_modules",
+    "reset": "npm run clean && npm run install:all"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.10"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "books",
+    "social",
+    "ai",
+    "reading",
+    "platform",
+    "arabic"
+  ],
+  "author": "Kitabi Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.11.0"
+  }
+}
