@@ -81,8 +81,10 @@ app.use(express.urlencoded({ extended: true }));
 // Static files middleware for uploads (with authentication will be handled in routes)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Connect to database
-connectDB();
+// Connect to database (non-blocking)
+connectDB().catch(err => {
+  console.log('📚 Continuing without database connection - sample books will still work');
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

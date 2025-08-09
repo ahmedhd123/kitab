@@ -27,16 +27,6 @@ const connectDB = async () => {
         console.log(`🔄 Attempting to connect to MongoDB: ${uri.replace(/\/\/.*@/, '//***@')}`);
         conn = await mongoose.connect(uri, mongoOptions);
         console.log(`📊 MongoDB Connected successfully: ${conn.connection.host}:${conn.connection.port}`);
-        
-        // Handle connection events
-        mongoose.connection.on('error', (err) => {
-          console.error('MongoDB connection error:', err);
-        });
-
-        mongoose.connection.on('disconnected', () => {
-          console.log('MongoDB disconnected');
-        });
-        
         return conn;
       } catch (error) {
         lastError = error;
@@ -56,14 +46,27 @@ const connectDB = async () => {
     return null;
   }
 };
+    
+    // Handle connection events
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+    });
 
-// Graceful close on app termination
-process.on('SIGINT', async () => {
-  if (mongoose.connection.readyState === 1) {
-    await mongoose.connection.close();
-    console.log('MongoDB connection closed.');
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected');
+    });
+
+    // Graceful close on app termination
+    process.on('SIGINT', async () => {
+      await mongoose.connection.close();
+      console.log('MongoDB connection closed.');
+      process.exit(0);
+    });
+
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error.message);
+    process.exit(1);
   }
-  process.exit(0);
-});
+};
 
 module.exports = connectDB;

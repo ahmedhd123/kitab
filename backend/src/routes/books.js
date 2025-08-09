@@ -154,6 +154,169 @@ router.get('/sample/:id/metadata/:format', async (req, res) => {
   }
 });
 
+// Get sample book content (for demo Arabic books)
+router.get('/sample/:id/content/:format', async (req, res) => {
+  try {
+    const { id, format } = req.params;
+    const book = sampleBooks.find(book => book.id === id);
+    
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'الكتاب غير موجود'
+      });
+    }
+    
+    // Generate sample Arabic content for demo books
+    if (book.language === 'ar') {
+      let content = '';
+      
+      if (format === 'txt') {
+        content = generateArabicTextContent(book);
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(content);
+      } else if (format === 'epub') {
+        content = generateEpubContent(book);
+        res.setHeader('Content-Type', 'application/epub+zip');
+        res.json({ content, chapters: generateChapters(book) });
+      } else if (format === 'pdf') {
+        res.json({
+          success: false,
+          message: 'عذراً، نحن نركز على صيغ الكتب الإلكترونية القياسية (EPUB, MOBI, TXT) لتوفير تجربة قراءة أفضل'
+        });
+      } else {
+        content = generateMobiContent(book);
+        res.json({ content, chapters: generateChapters(book) });
+      }
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'المحتوى غير متوفر'
+      });
+    }
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب المحتوى',
+      error: error.message
+    });
+  }
+});
+
+function generateArabicTextContent(book) {
+  return `
+${book.titleArabic}
+بقلم: ${book.authorArabic}
+
+${book.description}
+
+الفصل الأول: المقدمة
+
+في عالم مليء بالكلمات والحكايات، تبرز هذه القصة كواحدة من أجمل ما كُتب في الأدب العربي. إنها حكاية عن الحب والحياة، عن الأمل والألم، عن كل ما يجعل الإنسان إنساناً.
+
+تأخذنا هذه الرواية في رحلة عبر الزمن والمكان، حيث نتعرف على شخصيات حية نابضة بالحياة، كل منها تحمل في طياتها حكاية خاصة وتجربة فريدة.
+
+الفصل الثاني: البداية
+
+كانت البداية صعبة، كما هو الحال مع كل الأشياء الجميلة في الحياة. لم يكن الطريق مفروشاً بالورود، بل كان مليئاً بالتحديات والصعوبات التي جعلت كل خطوة إلى الأمام إنجازاً يستحق الاحتفال.
+
+في هذا الفصل، نتعرف على الشخصيات الرئيسية وندخل في عمق عالمها الداخلي، نفهم دوافعها ومخاوفها، آمالها وأحلامها.
+
+الفصل الثالث: التطور
+
+مع تقدم الأحداث، تبدأ الشخصيات في التطور والنمو. نراها تواجه تحديات جديدة وتتخذ قرارات مصيرية تغير مجرى حياتها إلى الأبد.
+
+هذا الفصل مليء بالتشويق والإثارة، حيث تتسارع الأحداث وتتعقد الأمور بطريقة تجعل القارئ متشوقاً لمعرفة ما سيحدث بعد ذلك.
+
+الفصل الرابع: الذروة
+
+هنا تصل الأحداث إلى ذروتها، حيث تتداخل خيوط القصة وتتشابك بطريقة محكمة. نشهد لحظات من التوتر والإثارة تحبس الأنفاس وتجعل القلب ينبض بقوة.
+
+الشخصيات تواجه أكبر تحدياتها، وعليها أن تتخذ أصعب القرارات في حياتها. إنه فصل مليء بالعواطف القوية والمشاعر الصادقة.
+
+الفصل الخامس: الحل
+
+بعد كل ما مر به الأبطال، يأتي وقت الحل والنهاية. لكن هذه النهاية ليست مجرد إنهاء للأحداث، بل هي بداية جديدة لفهم أعمق للحياة والإنسان.
+
+في هذا الفصل، نجد الإجابات على كثير من الأسئلة التي طرحناها في بداية الرحلة، ونكتشف حقائق جديدة عن أنفسنا وعن العالم من حولنا.
+
+الخاتمة
+
+في النهاية، تبقى هذه القصة في قلوبنا وعقولنا، تذكرنا بقوة الكلمة وجمال الأدب. إنها دعوة للتأمل والتفكير، دعوة لأن نكون أفضل مما نحن عليه.
+
+هذا الكتاب ليس مجرد حكاية، بل هو مرآة نرى فيها أنفسنا، ونافذة نطل منها على عوالم جديدة مليئة بالإمكانيات والأحلام.
+`;
+}
+
+function generateEpubContent(book) {
+  return `
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" dir="rtl" lang="ar">
+<head>
+    <meta charset="utf-8"/>
+    <title>${book.titleArabic}</title>
+    <style>
+        body {
+            font-family: 'Amiri', 'Noto Sans Arabic', 'Cairo', serif;
+            line-height: 1.8;
+            margin: 2em;
+            text-align: justify;
+            direction: rtl;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .chapter {
+            margin: 3em 0;
+            page-break-before: always;
+        }
+        .quote {
+            font-style: italic;
+            margin: 2em;
+            padding: 1em;
+            border-right: 4px solid #3498db;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="chapter">
+        <h1>${book.titleArabic}</h1>
+        <h2>بقلم: ${book.authorArabic}</h2>
+        <p>${book.description}</p>
+    </div>
+    
+    <div class="chapter">
+        <h2>الفصل الأول: المقدمة</h2>
+        <p>في عالم مليء بالكلمات والحكايات، تبرز هذه القصة كواحدة من أجمل ما كُتب في الأدب العربي...</p>
+    </div>
+    
+    <div class="chapter">
+        <h2>الفصل الثاني: البداية</h2>
+        <p>كانت البداية صعبة، كما هو الحال مع كل الأشياء الجميلة في الحياة...</p>
+    </div>
+</body>
+</html>
+`;
+}
+
+function generateMobiContent(book) {
+  return generateEpubContent(book); // Similar format for demo
+}
+
+function generateChapters(book) {
+  return [
+    { id: '1', title: 'المقدمة', href: '#chapter-1', level: 1 },
+    { id: '2', title: 'الفصل الأول: البداية', href: '#chapter-2', level: 1 },
+    { id: '3', title: 'الفصل الثاني: التطور', href: '#chapter-3', level: 1 },
+    { id: '4', title: 'الفصل الثالث: الذروة', href: '#chapter-4', level: 1 },
+    { id: '5', title: 'الفصل الرابع: الحل', href: '#chapter-5', level: 1 },
+    { id: '6', title: 'الخاتمة', href: '#chapter-6', level: 1 }
+  ];
+}
+
 // Get all books
 router.get('/', async (req, res) => {
   try {
