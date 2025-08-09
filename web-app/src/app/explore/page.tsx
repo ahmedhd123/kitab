@@ -29,7 +29,8 @@ export default function ExplorePage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const [filters, setFilters] = useState<FilterState>({
-    genres: searchParams?.get('genre') ? [searchParams.get('genre')!] : [],
+    genres: searchParams?.get('genre') ? [searchParams.get('genre')!] : 
+           searchParams?.get('category') === 'arabic' ? ['أدب عربي'] : [],
     languages: [],
     ratings: [],
     publishYear: [1900, 2025],
@@ -37,10 +38,22 @@ export default function ExplorePage() {
     viewMode: 'grid'
   });
 
+  // Check if this is Arabic books category
+  const isArabicCategory = searchParams?.get('category') === 'arabic';
+
+  // Update filters when URL parameters change
+  useEffect(() => {
+    if (isArabicCategory) {
+      setFilters(prev => ({
+        ...prev,
+        genres: ['أدب عربي']
+      }));
+    }
+  }, [isArabicCategory]);
+
   const { books, loading, error } = useBooks({ 
     search: searchQuery,
-    genres: filters.genres,
-    sort: filters.sortBy,
+    genre: filters.genres[0] || undefined,
     limit: 24 
   });
 
@@ -115,16 +128,29 @@ export default function ExplorePage() {
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 rtl:space-x-reverse bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full px-6 py-3 mb-6 shadow-lg border border-purple-200/50">
-              <BookOpen className="w-5 h-5 text-purple-600" />
-              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">استكشف المكتبة</span>
+            <div className={`inline-flex items-center space-x-2 rtl:space-x-reverse backdrop-blur-sm rounded-full px-6 py-3 mb-6 shadow-lg border ${
+              isArabicCategory 
+                ? 'bg-amber-100/80 dark:bg-amber-800/80 border-amber-200/50' 
+                : 'bg-white/80 dark:bg-gray-800/80 border-purple-200/50'
+            }`}>
+              <BookOpen className={`w-5 h-5 ${isArabicCategory ? 'text-amber-600' : 'text-purple-600'}`} />
+              <span className={`text-sm font-medium ${
+                isArabicCategory 
+                  ? 'text-amber-600 dark:text-amber-400' 
+                  : 'text-purple-600 dark:text-purple-400'
+              }`}>
+                {isArabicCategory ? 'الأدب العربي' : 'استكشف المكتبة'}
+              </span>
             </div>
             
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              اكتشف كتابك التالي
+              {isArabicCategory ? 'كنوز الأدب العربي' : 'اكتشف كتابك التالي'}
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              تصفح مكتبتنا الواسعة واعثر على الكتب التي تناسب اهتماماتك ومزاجك
+              {isArabicCategory 
+                ? 'استكشف روائع الأدب العربي من الكلاسيكيات إلى الأعمال المعاصرة'
+                : 'تصفح مكتبتنا الواسعة واعثر على الكتب التي تناسب اهتماماتك ومزاجك'
+              }
             </p>
           </div>
 
@@ -480,12 +506,12 @@ export default function ExplorePage() {
                                 
                                 <div className="flex items-center space-x-1 rtl:space-x-reverse text-gray-500 text-xs">
                                   <Eye className="w-4 h-4" />
-                                  <span>{book.viewCount || 0} مشاهدة</span>
+                                  <span>{book.ratingsCount || 0} مشاهدة</span>
                                 </div>
                                 
                                 <div className="flex items-center space-x-1 rtl:space-x-reverse text-gray-500 text-xs">
                                   <Calendar className="w-4 h-4" />
-                                  <span>{book.publishedYear || 'غير محدد'}</span>
+                                  <span>{book.year || 'غير محدد'}</span>
                                 </div>
                               </div>
                               

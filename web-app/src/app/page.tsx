@@ -12,7 +12,10 @@ export default function Home() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const router = useRouter();
+  
+  // Get non-Arabic books for featured section
   const { books: featuredBooks, loading, error } = useBooks({ limit: 6 });
+  const nonArabicBooks = featuredBooks.filter(book => !book.genres.includes('أدب عربي'));
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -61,7 +64,7 @@ export default function Home() {
   ];
 
   const genres = [
-    { name: "أدب عربي", count: "1,234", color: "purple" },
+    { name: "أدب عربي", count: "2,547", color: "amber", featured: true },
     { name: "خيال علمي", count: "856", color: "blue" },
     { name: "تطوير ذات", count: "2,103", color: "green" },
     { name: "تاريخ", count: "945", color: "orange" },
@@ -139,14 +142,22 @@ export default function Home() {
                 <Link 
                   key={index}
                   href={`/explore?genre=${encodeURIComponent(genre.name)}`} 
-                  className={`group relative p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:bg-white/90 dark:hover:bg-gray-800/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`}
+                  className={`group relative p-4 ${genre.featured 
+                    ? 'bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 border-2 border-amber-300 dark:border-amber-600' 
+                    : 'bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-gray-700/50'
+                  } backdrop-blur-sm rounded-2xl hover:bg-white/90 dark:hover:bg-gray-800/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`}
                 >
                   <div className="text-center">
-                    <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-${genre.color}-500 to-${genre.color}-600 flex items-center justify-center`}>
+                    <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-${genre.color}-500 to-${genre.color}-600 flex items-center justify-center ${genre.featured ? 'ring-2 ring-amber-400' : ''}`}>
                       <BookOpen className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">{genre.name}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{genre.count} كتاب</p>
+                    <h3 className={`font-semibold text-sm mb-1 ${genre.featured ? 'text-amber-800 dark:text-amber-200' : 'text-gray-900 dark:text-white'}`}>
+                      {genre.name}
+                      {genre.featured && <span className="text-xs text-amber-600 dark:text-amber-400 block">⭐ مميز</span>}
+                    </h3>
+                    <p className={`text-xs ${genre.featured ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                      {genre.count} كتاب
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -199,16 +210,149 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Arabic Books Section */}
+      <section className="py-24 px-4 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-red-900/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center space-x-2 rtl:space-x-reverse bg-gradient-to-r from-amber-600/10 to-orange-600/10 rounded-full px-6 py-3 mb-6">
+              <BookOpen className="w-5 h-5 text-amber-600" />
+              <span className="text-sm font-medium text-amber-600 dark:text-amber-400">تراثنا الأدبي</span>
+            </div>
+            
+            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              الكتب العربية المميزة
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              اكتشف روائع الأدب العربي والكتاب المعاصرين الذين أثروا الثقافة العربية
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* دعاء الكروان - طه حسين */}
+            <Link href="/book/7" className="group cursor-pointer block">
+              <div className="relative overflow-hidden rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-600/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+                
+                <img
+                  src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=800&fit=crop"
+                  alt="دعاء الكروان"
+                  className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                
+                <div className="absolute top-6 right-6 z-20">
+                  <span className="px-4 py-2 bg-amber-100/95 dark:bg-amber-800/95 backdrop-blur-sm rounded-full text-sm font-medium text-amber-800 dark:text-amber-200 shadow-lg">
+                    أدب عربي كلاسيكي
+                  </span>
+                </div>
+                
+                <div className="absolute top-6 left-6 z-20">
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Handle add to favorites
+                    }}
+                    className="p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
+                  >
+                    <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
+                  </button>
+                </div>
+                
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white z-20">
+                  <h3 className="font-bold text-2xl mb-2">دعاء الكروان</h3>
+                  <p className="text-gray-200 text-lg mb-4">طه حسين</p>
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">رواية مؤثرة تحكي قصة حب وألم في الريف المصري، من روائع الأدب العربي الحديث</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-4 h-4 ${i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium">4.9</span>
+                    </div>
+                    <span className="text-sm text-gray-300">1,563 تقييم</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* مدن الملح - عبد الرحمن منيف */}
+            <Link href="/book/8" className="group cursor-pointer block">
+              <div className="relative overflow-hidden rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-600/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+                
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop"
+                  alt="مدن الملح"
+                  className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                
+                <div className="absolute top-6 right-6 z-20">
+                  <span className="px-4 py-2 bg-amber-100/95 dark:bg-amber-800/95 backdrop-blur-sm rounded-full text-sm font-medium text-amber-800 dark:text-amber-200 shadow-lg">
+                    أدب عربي معاصر
+                  </span>
+                </div>
+                
+                <div className="absolute top-6 left-6 z-20">
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Handle add to favorites
+                    }}
+                    className="p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
+                  >
+                    <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
+                  </button>
+                </div>
+                
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white z-20">
+                  <h3 className="font-bold text-2xl mb-2">مدن الملح</h3>
+                  <p className="text-gray-200 text-lg mb-4">عبد الرحمن منيف</p>
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">ملحمة روائية خماسية تصور التحولات الاجتماعية والثقافية في المنطقة العربية</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-4 h-4 ${i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium">4.8</span>
+                    </div>
+                    <span className="text-sm text-gray-300">987 تقييم</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* CTA for Arabic Books */}
+          <div className="text-center mt-16">
+            <Link href="/explore?category=arabic" className="group inline-flex items-center space-x-3 rtl:space-x-reverse bg-gradient-to-r from-amber-600 to-orange-600 text-white px-8 py-4 rounded-2xl hover:from-amber-700 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+              <span className="font-medium">استكشف المزيد من الكتب العربية</span>
+              <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Books Section */}
       <section className="py-24 px-4 bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-16">
             <div>
               <h2 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
-                كتب مميزة
+                كتب مميزة أخرى
               </h2>
               <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300">
-                اكتشف أفضل الكتب المختارة لك بعناية
+                اكتشف أفضل الكتب العالمية المختارة لك بعناية
               </p>
             </div>
             <Link href="/explore" className="group flex items-center space-x-3 rtl:space-x-reverse bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-2xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
@@ -235,8 +379,8 @@ export default function Home() {
                   </div>
                 </div>
               ))
-            ) : featuredBooks.length > 0 ? (
-              featuredBooks.map((book) => (
+            ) : nonArabicBooks.length > 0 ? (
+              nonArabicBooks.slice(0, 6).map((book) => (
                 <Link key={book.id} href={`/book/${book.id}`} className="group cursor-pointer block">
                   <div className="relative overflow-hidden rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
@@ -270,8 +414,8 @@ export default function Home() {
                     </div>
                     
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white z-20">
-                      <h3 className="font-bold text-xl mb-2 line-clamp-2">{book.title}</h3>
-                      <p className="text-gray-200 text-base mb-4">{book.author}</p>
+                      <h3 className="font-bold text-xl mb-2 line-clamp-2">{book.titleArabic || book.title}</h3>
+                      <p className="text-gray-200 text-base mb-4">{book.authorArabic || book.author}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 rtl:space-x-reverse">
                           <div className="flex items-center">
