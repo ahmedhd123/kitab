@@ -2,11 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, BookOpen } from 'lucide-react';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,14 +18,62 @@ export default function RegisterPage() {
     confirmPassword: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     if (formData.password !== formData.confirmPassword) {
-      alert('كلمات المرور غير متطابقة');
+      setError('كلمات المرور غير متطابقة');
       return;
     }
-    // TODO: Integrate with backend API
-    console.log('إنشاء حساب جديد:', formData);
+
+    if (formData.password.length < 6) {
+      setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Generate a clean username from the name
+      const cleanUsername = formData.name
+        .replace(/[^a-zA-Z0-9]/g, '') // Remove all non-alphanumeric characters
+        .toLowerCase()
+        .substring(0, 20) // Limit length
+        || 'user' + Date.now().toString().slice(-6); // Fallback if name is empty or all special chars
+
+      const response = await fetch('http://localhost:5002/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: cleanUsername,
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.name.split(' ')[0] || '',
+          lastName: formData.name.split(' ').slice(1).join(' ') || ''
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the token in localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Redirect to dashboard or home page
+        router.push('/');
+      } else {
+        setError(data.message || 'حدث خطأ أثناء التسجيل');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('حدث خطأ في الاتصال. تأكد من تشغيل الخادم.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +90,13 @@ export default function RegisterPage() {
 
         {/* Register Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm text-right">{error}</p>
+            </div>
+          )}
+
           {/* Name Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -151,9 +210,10 @@ export default function RegisterPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors duration-200"
+            disabled={loading}
+            className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors duration-200 disabled:bg-emerald-400 disabled:cursor-not-allowed"
           >
-            إنشاء حساب
+            {loading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
           </button>
         </form>
 

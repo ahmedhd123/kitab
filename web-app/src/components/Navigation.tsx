@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   BookOpen, 
@@ -15,16 +15,45 @@ import {
   Bell,
   Settings,
   LogOut,
-  Mail
+  Mail,
+  UserPlus,
+  LogIn
 } from 'lucide-react';
+import { getAuthUser, isAuthenticated as checkAuthStatus, logout, getDisplayName, User as AuthUser } from '../utils/auth';
 
 interface NavigationProps {
   currentPage?: string;
 }
 
+type MenuItem = {
+  label: string;
+  icon: any;
+  href: string;
+  admin?: boolean;
+  onClick?: () => void;
+};
+
 export default function Navigation({ currentPage = 'home' }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const authStatus = checkAuthStatus();
+    const userData = getAuthUser();
+    
+    setIsAuthenticated(authStatus);
+    setUser(userData);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsAuthenticated(false);
+    setUser(null);
+    setIsProfileDropdownOpen(false);
+  };
 
   const navigationItems = [
     { id: 'home', label: 'الرئيسية', icon: Home, href: '/' },
@@ -34,15 +63,17 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
     { id: 'favorites', label: 'المفضلة', icon: Heart, href: '/favorites' },
   ];
 
-  const userMenuItems = [
+  const userMenuItems: MenuItem[] = [
     { label: 'ملفي الشخصي', icon: User, href: '/profile/1' },
     { label: 'الإشعارات', icon: Bell, href: '/notifications' },
     { label: 'الإعدادات', icon: Settings, href: '/settings' },
     { label: 'إدارة الكتب', icon: BookOpen, href: '/admin/books', admin: true },
     { label: 'استيراد كتب', icon: BookOpen, href: '/admin/import', admin: true },
     { label: 'تواصل معنا', icon: Mail, href: '/contact' },
-    { label: 'تسجيل الخروج', icon: LogOut, href: '/auth/login' },
+    { label: 'تسجيل الخروج', icon: LogOut, href: '#', onClick: handleLogout },
   ];
+
+  const displayName = getDisplayName(user);
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
@@ -100,54 +131,92 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
 
           {/* User Profile & Mobile Menu */}
           <div className="flex items-center gap-4">
-            {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:text-purple-600 transition-colors">
-              <Bell className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                3
-              </span>
-            </button>
+            {isAuthenticated ? (
+              <>
+                {/* Notifications */}
+                <button className="relative p-2 text-gray-600 hover:text-purple-600 transition-colors">
+                  <Bell className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    3
+                  </span>
+                </button>
 
-            {/* User Profile Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-purple-600" />
-                </div>
-                <span className="hidden md:block text-gray-700 font-medium">سارة</span>
-              </button>
+                {/* User Profile Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <span className="hidden md:block text-gray-700 font-medium">{displayName}</span>
+                  </button>
 
-              {/* Profile Dropdown */}
-              {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-gray-200">
-                    <p className="text-sm font-medium text-gray-800">سارة أحمد</p>
-                    <p className="text-sm text-gray-500">sara@example.com</p>
-                  </div>
-                  
-                  {userMenuItems.map((item, index) => {
-                    const Icon = item.icon;
-                    // Skip admin items for non-admin users (in real app, check user role)
-                    if (item.admin && false) return null; // Replace false with actual admin check
-                    
-                    return (
-                      <Link
-                        key={index}
-                        href={item.href}
-                        className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                      >
-                        <Icon className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
+                  {/* Profile Dropdown */}
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      <div className="px-4 py-3 border-b border-gray-200">
+                        <p className="text-sm font-medium text-gray-800">{displayName}</p>
+                        <p className="text-sm text-gray-500">{user?.email}</p>
+                      </div>
+                      
+                      {userMenuItems.map((item, index) => {
+                        const Icon = item.icon;
+                        // Skip admin items for non-admin users (in real app, check user role)
+                        if (item.admin && false) return null; // Replace false with actual admin check
+                        
+                        if (item.onClick) {
+                          return (
+                            <button
+                              key={index}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                item.onClick!();
+                              }}
+                              className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors w-full text-right"
+                            >
+                              <Icon className="w-4 h-4" />
+                              <span>{item.label}</span>
+                            </button>
+                          );
+                        }
+                        
+                        return (
+                          <Link
+                            key={index}
+                            href={item.href}
+                            className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              /* Auth buttons for non-authenticated users */
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:text-purple-700 font-medium transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:block">تسجيل دخول</span>
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors shadow-md hover:shadow-lg"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span className="hidden sm:block">إنشاء حساب</span>
+                </Link>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -204,6 +273,28 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
                 );
               })}
             </div>
+
+            {/* Mobile Auth Buttons for non-authenticated users */}
+            {!isAuthenticated && (
+              <div className="px-4 pt-4 space-y-2 border-t border-gray-200 mt-4">
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-3 px-4 py-3 text-purple-600 hover:bg-purple-50 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LogIn className="w-5 h-5" />
+                  <span className="font-medium">تسجيل دخول</span>
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="flex items-center gap-3 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <UserPlus className="w-5 h-5" />
+                  <span className="font-medium">إنشاء حساب</span>
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>

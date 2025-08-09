@@ -1,8 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
-const User = require('../models/User');
-const { auth } = require('../middleware/auth');
+const userStore = require('../models/InMemoryUserStore');
 
 const router = express.Router();
 
@@ -34,7 +33,7 @@ const generateToken = (userId) => {
 };
 
 // @route   POST /api/auth/register
-// @desc    Register a new user
+// @desc    Register a new user (In-Memory for testing)
 // @access  Public
 router.post('/register', async (req, res) => {
   try {
@@ -50,7 +49,7 @@ router.post('/register', async (req, res) => {
     const { username, email, password, firstName, lastName } = value;
 
     // Check if user already exists
-    const existingUser = await User.findOne({
+    const existingUser = await userStore.findOne({
       $or: [{ email }, { username }]
     });
 
@@ -62,7 +61,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Create new user
-    const user = new User({
+    const user = await userStore.save({
       username,
       email,
       password,
@@ -71,8 +70,6 @@ router.post('/register', async (req, res) => {
         lastName: lastName || ''
       }
     });
-
-    await user.save();
 
     // Generate token
     const token = generateToken(user._id);
@@ -102,7 +99,7 @@ router.post('/register', async (req, res) => {
 });
 
 // @route   POST /api/auth/login
-// @desc    Login user
+// @desc    Login user (In-Memory for testing)
 // @access  Public
 router.post('/login', async (req, res) => {
   try {
@@ -118,7 +115,7 @@ router.post('/login', async (req, res) => {
     const { email, password } = value;
 
     // Find user by email
-    const user = await User.findOne({ email }).select('+password');
+    const user = await userStore.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -134,9 +131,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Update last active
-    user.lastActive = new Date();
-    await user.save();
+    // Update last active (for in-memory store, we'll update the stored user)
+    const storedUser = userStore.users.get(user._id);
+    if (storedUser) {
+      storedUser.lastActive = new Date();
+    }
 
     // Generate token
     const token = generateToken(user._id);
@@ -147,8 +146,7 @@ router.post('/login', async (req, res) => {
       username: user.username,
       email: user.email,
       profile: user.profile,
-      stats: user.stats,
-      aiPreferences: user.aiPreferences
+      stats: user.stats
     };
 
     res.json({
@@ -167,124 +165,79 @@ router.post('/login', async (req, res) => {
 });
 
 // @route   GET /api/auth/me
-// @desc    Get current user
+// @desc    Get current user info
 // @access  Private
-router.get('/me', auth, async (req, res) => {
+router.get('/me', async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // Get token from header
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ 
+        message: 'No token provided, authorization denied' 
+      });
     }
 
-    res.json({
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        profile: user.profile,
-        stats: user.stats,
-        privacy: user.privacy,
-        aiPreferences: user.aiPreferences,
-        isVerified: user.isVerified,
-        lastActive: user.lastActive
-      }
-    });
-
-  } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({
-      message: 'Server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : {}
-    });
-  }
-});
-
-// @route   POST /api/auth/refresh
-// @desc    Refresh JWT token
-// @access  Private
-router.post('/refresh', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId);
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    
+    // Get user data
+    const user = await userStore.findById(decoded.userId);
     if (!user || !user.isActive) {
-      return res.status(401).json({ message: 'User not found or inactive' });
+      return res.status(401).json({ 
+        message: 'Token is not valid or user is inactive' 
+      });
     }
 
-    // Generate new token
-    const token = generateToken(user._id);
+    // Return user data (without sensitive information)
+    const userData = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      profile: user.profile,
+      stats: user.stats
+    };
 
     res.json({
-      message: 'Token refreshed successfully',
-      token
+      user: userData
     });
 
   } catch (error) {
-    console.error('Token refresh error:', error);
-    res.status(500).json({
-      message: 'Server error during token refresh',
-      error: process.env.NODE_ENV === 'development' ? error.message : {}
-    });
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Token is not valid' });
+    } else if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token has expired' });
+    }
+    
+    console.error('Auth /me error:', error);
+    res.status(500).json({ message: 'Server error in authentication' });
   }
 });
 
-// @route   POST /api/auth/logout
-// @desc    Logout user (client-side token removal)
-// @access  Private
-router.post('/logout', auth, async (req, res) => {
+// @route   GET /api/auth/users
+// @desc    Get all users (for testing)
+// @access  Public
+router.get('/users', async (req, res) => {
   try {
-    // In a real app, you might want to blacklist the token
-    // For now, we'll just confirm the logout
-    res.json({ message: 'Logged out successfully' });
-  } catch (error) {
-    console.error('Logout error:', error);
-    res.status(500).json({
-      message: 'Server error during logout',
-      error: process.env.NODE_ENV === 'development' ? error.message : {}
+    const users = Array.from(userStore.users.values()).map(user => ({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      profile: user.profile,
+      stats: user.stats,
+      isActive: user.isActive,
+      createdAt: user.createdAt
+    }));
+
+    res.json({
+      message: 'Users retrieved successfully',
+      count: users.length,
+      users
     });
-  }
-});
-
-// @route   PUT /api/auth/change-password
-// @desc    Change user password
-// @access  Private
-router.put('/change-password', auth, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    // Validate input
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        message: 'Current password and new password are required'
-      });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        message: 'New password must be at least 6 characters long'
-      });
-    }
-
-    // Get user with password
-    const user = await User.findById(req.user.userId).select('+password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Verify current password
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect' });
-    }
-
-    // Update password
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ message: 'Password updated successfully' });
-
   } catch (error) {
-    console.error('Change password error:', error);
+    console.error('Get users error:', error);
     res.status(500).json({
-      message: 'Server error during password change',
+      message: 'Server error retrieving users',
       error: process.env.NODE_ENV === 'development' ? error.message : {}
     });
   }
