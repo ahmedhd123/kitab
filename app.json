@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "3a7dc696-d2a9-4be7-bdb9-d7b2a4461372"
+      }
+    },
+    "android": {
+      "package": "com.ahmedhd123.kitabisystem"
+    }
+  }
+}
