@@ -1,0 +1,69 @@
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+  try {
+    // Support multiple MongoDB connection options
+    const mongoOptions = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      // Connection timeout settings
+      serverSelectionTimeoutMS: 5000, // Reduce timeout to fail faster
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+    };
+
+    // Try multiple connection strings in order of preference
+    const connectionStrings = [
+      process.env.MONGODB_URI, // Environment variable (highest priority)
+      'mongodb://127.0.0.1:27017/kitabi', // Local IPv4
+      'mongodb://localhost:27017/kitabi', // Local hostname
+      'mongodb://0.0.0.0:27017/kitabi', // All interfaces
+    ].filter(Boolean); // Remove undefined values
+
+    let conn = null;
+    let lastError = null;
+
+    for (const uri of connectionStrings) {
+      try {
+        console.log(`🔄 Attempting to connect to MongoDB: ${uri.replace(/\/\/.*@/, '//***@')}`);
+        conn = await mongoose.connect(uri, mongoOptions);
+        console.log(`📊 MongoDB Connected successfully: ${conn.connection.host}:${conn.connection.port}`);
+        
+        // Handle connection events
+        mongoose.connection.on('error', (err) => {
+          console.error('MongoDB connection error:', err);
+        });
+
+        mongoose.connection.on('disconnected', () => {
+          console.log('MongoDB disconnected');
+        });
+        
+        return conn;
+      } catch (error) {
+        lastError = error;
+        console.warn(`⚠️  Failed to connect to ${uri.replace(/\/\/.*@/, '//***@')}: ${error.message}`);
+        continue;
+      }
+    }
+
+    // If we get here, all connections failed
+    console.error('❌ All MongoDB connection attempts failed');
+    console.log('📚 Server will continue without database - sample books will still work');
+    return null;
+    
+  } catch (error) {
+    console.error('❌ Database connection error:', error.message);
+    console.log('📚 Server will continue without database - sample books will still work');
+    return null;
+  }
+};
+
+// Graceful close on app termination
+process.on('SIGINT', async () => {
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed.');
+  }
+  process.exit(0);
+});
+
+module.exports = connectDB;
