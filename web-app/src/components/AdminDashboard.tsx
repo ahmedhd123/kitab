@@ -13,7 +13,8 @@ import {
   DocumentPlusIcon,
   UserPlusIcon,
   StarIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  DocumentArrowUpIcon
 } from '@heroicons/react/24/outline';
 
 interface DashboardStats {
@@ -299,7 +300,7 @@ const AdminDashboard = () => {
         {/* Quick Actions */}
         <div className="mt-8">
           <h3 className="text-lg font-medium text-gray-900 mb-4">إجراءات سريعة</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Link
               href="/admin/books/new"
               className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors text-center"
@@ -322,6 +323,14 @@ const AdminDashboard = () => {
             >
               <ChatBubbleLeftRightIcon className="w-8 h-8 mx-auto mb-2" />
               <span className="text-sm font-medium">مراجعة التعليقات</span>
+            </Link>
+            
+            <Link
+              href="/admin/files"
+              className="bg-indigo-600 text-white p-4 rounded-lg hover:bg-indigo-700 transition-colors text-center"
+            >
+              <DocumentArrowUpIcon className="w-8 h-8 mx-auto mb-2" />
+              <span className="text-sm font-medium">إدارة الملفات</span>
             </Link>
             
             <Link

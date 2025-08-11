@@ -13,7 +13,8 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
-  BellIcon
+  BellIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 interface AdminLayoutProps {
@@ -63,6 +64,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       href: '/admin/reviews',
       icon: ChatBubbleLeftRightIcon,
       current: pathname.startsWith('/admin/reviews')
+    },
+    {
+      name: 'إدارة الملفات',
+      href: '/admin/files',
+      icon: DocumentTextIcon,
+      current: pathname.startsWith('/admin/files')
     },
     {
       name: 'التحليلات',

@@ -11,8 +11,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'admin@kitabi.com',
+    password: 'admin123'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5002/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,14 +39,18 @@ export default function LoginPage() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         
-        // Redirect to dashboard or home page
-        router.push('/');
+        // Check if user is admin and redirect accordingly
+        if (data.user.isAdmin || data.user.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
       } else {
         setError(data.message || 'حدث خطأ أثناء تسجيل الدخول');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('حدث خطأ في الاتصال. تأكد من تشغيل الخادم.');
+      setError(`حدث خطأ في الاتصال بالخادم. تأكد من تشغيل Backend على localhost:5000. للمساعدة: اذهب إلى /test-connection`);
     } finally {
       setLoading(false);
     }
@@ -72,6 +76,17 @@ export default function LoginPage() {
               <p className="text-red-600 text-sm text-right">{error}</p>
             </div>
           )}
+
+          {/* Demo Notice */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-sm text-right font-medium">
+              🧪 وضع التجريب - بيانات الدخول محملة مسبقاً
+            </p>
+            <div className="mt-2 text-xs text-blue-600 text-right">
+              <p><strong>للمدير:</strong> admin@kitabi.com / admin123</p>
+              <p><strong>للاختبار:</strong> <a href="/test-connection" className="underline">صفحة التشخيص</a></p>
+            </div>
+          </div>
 
           {/* Email Field */}
           <div>

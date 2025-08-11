@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
-const authRoutes = require('./routes/auth'); // Back to real auth routes with MongoDB
+const authRoutes = require('./routes/auth-enhanced'); // Enhanced auth with sample data fallback
 const userRoutes = require('./routes/users');
 const bookRoutes = require('./routes/books');
 const reviewRoutes = require('./routes/reviews');
