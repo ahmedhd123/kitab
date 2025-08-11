@@ -10,11 +10,28 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd web-app && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../web-app && npm install",
+    "dev:mobile": "cd mobile-app/KitabiMobile && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../web-app && npm install && cd ../mobile-app/KitabiMobile && npm install",
     "build": "cd web-app && npm run build",
+    "build:all": "npm run build:backend && npm run build:frontend && npm run build:mobile",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd web-app && npm run build",
+    "build:mobile": "cd mobile-app/KitabiMobile && npm run build",
+    "build:apk": "cd mobile-app/KitabiMobile && eas build --platform android --profile production",
+    "build:apk:local": "cd mobile-app/KitabiMobile && npx expo prebuild --platform android && cd android && .\\gradlew assembleRelease",
     "test": "cd backend && npm test",
-    "clean": "rimraf backend/node_modules web-app/node_modules node_modules",
-    "reset": "npm run clean && npm run install:all"
+    "test:all": "npm run test:backend && npm run test:frontend && npm run test:mobile",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd web-app && npm test",
+    "test:mobile": "cd mobile-app/KitabiMobile && npm test",
+    "clean": "rimraf backend/node_modules web-app/node_modules mobile-app/KitabiMobile/node_modules node_modules",
+    "reset": "npm run clean && npm run install:all",
+    "config:update": "node scripts/config-manager.js update",
+    "config:dev": "node scripts/config-manager.js update development",
+    "config:staging": "node scripts/config-manager.js update staging",
+    "config:production": "node scripts/config-manager.js update production",
+    "version:sync": "node scripts/config-manager.js version",
+    "deploy:complete": "npm run config:production && npm run build:all && npm run build:apk"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
@@ -34,6 +51,7 @@
   "author": "Kitabi Team",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.11.0"
+    "axios": "^1.11.0",
+    "compression": "^1.8.1"
   }
 }

@@ -1,0 +1,9 @@
+{
+  "development": {
+    "status": "configured",
+    "timestamp": "2025-08-11T17:09:06.869Z",
+    "backend": "http://localhost:5000",
+    "frontend": "http://localhost:3000",
+    "database": "mongodb://localhost:27017/kitabi"
+  }
+}
