@@ -65,6 +65,20 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   lastActive: { type: Date, default: Date.now },
   
+  // Admin and Role Management
+  role: { 
+    type: String, 
+    enum: ['user', 'moderator', 'admin'], 
+    default: 'user' 
+  },
+  isAdmin: { type: Boolean, default: false },
+  status: { 
+    type: String, 
+    enum: ['active', 'inactive', 'suspended'], 
+    default: 'active' 
+  },
+  name: { type: String, trim: true }, // For admin display
+  
   // AI Preferences
   aiPreferences: {
     enableRecommendations: { type: Boolean, default: true },
