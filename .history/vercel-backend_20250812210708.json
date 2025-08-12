@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "name": "kitabi-backend",
+  "builds": [
+    {
+      "src": "backend/src/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/src/server.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/backend/src/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/backend/src/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "MONGODB_URI": "mongodb+srv://ahmedhd123:Ahmedhd123@kitabi1.8zozmw.mongodb.net/kitabi?retryWrites=true&w=majority",
+    "JWT_SECRET": "kitabi-super-secret-production-jwt-key-2025",
+    "CLIENT_URL": "https://kitabi.vercel.app",
+    "ALLOWED_ORIGINS": "https://kitabi.vercel.app,https://kitabi-backend.vercel.app"
+  },
+  "functions": {
+    "backend/src/server.js": {
+      "maxDuration": 30
+    }
+  }
+}
