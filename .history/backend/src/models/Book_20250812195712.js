@@ -137,8 +137,7 @@ const bookSchema = new mongoose.Schema({
 });
 
 // Indexes for better performance
-// Text index removed temporarily due to language conflict
-// bookSchema.index({ title: 'text', description: 'text' }, { default_language: 'none' });
+bookSchema.index({ title: 'text', description: 'text' }, { default_language: 'none' });
 bookSchema.index({ 'authors.name': 1 });
 bookSchema.index({ genres: 1 });
 bookSchema.index({ 'ratings.average': -1 });

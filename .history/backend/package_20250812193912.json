@@ -13,8 +13,8 @@
     "seed:standard-ebooks": "node scripts/run-seed.js",
     "atlas:test": "node scripts/setup-atlas.js test",
     "atlas:setup": "node scripts/setup-atlas.js setup",
-    "db:setup": "node scripts/setup-atlas-v2.js setup",
-    "db:test": "node scripts/setup-atlas-v2.js test"
+    "db:setup": "node scripts/setup-atlas.js setup",
+    "db:test": "node scripts/setup-atlas.js test"
   },
   "keywords": [
     "books",
