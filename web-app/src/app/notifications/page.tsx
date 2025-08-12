@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Bell, 
   BookOpen, 
@@ -10,63 +10,177 @@ import {
   Settings,
   Check,
   Trash2,
-  Filter
+  Filter,
+  RefreshCw
 } from 'lucide-react';
 
 interface Notification {
   id: string;
-  type: 'review' | 'follow' | 'like' | 'comment' | 'recommendation';
+  type: 'review' | 'follow' | 'like' | 'comment' | 'recommendation' | 'book_added' | 'system';
   title: string;
   message: string;
-  time: string;
+  timeAgo?: string;
   read: boolean;
-  avatar?: string;
+  priority: 'low' | 'medium' | 'high';
+  actionUrl?: string;
+  relatedBook?: {
+    title: string;
+    author: string;
+  };
+  relatedUser?: {
+    username: string;
+    avatar?: string;
+  };
 }
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState('all');
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'follow',
-      title: 'متابع جديد',
-      message: 'أحمد محمد بدأ في متابعتك',
-      time: 'منذ دقيقتين',
-      read: false
-    },
-    {
-      id: '2',
-      type: 'like',
-      title: 'إعجاب بمراجعتك',
-      message: 'سارة أعجبت بمراجعتك لكتاب "مئة عام من العزلة"',
-      time: 'منذ 5 دقائق',
-      read: false
-    },
-    {
-      id: '3',
-      type: 'comment',
-      title: 'تعليق جديد',
-      message: 'علق محمد على مراجعتك: "مراجعة رائعة، شكراً لك"',
-      time: 'منذ 15 دقيقة',
-      read: true
-    },
-    {
-      id: '4',
-      type: 'recommendation',
-      title: 'توصية جديدة',
-      message: 'لدينا كتاب جديد قد يعجبك: "الخيميائي"',
-      time: 'منذ ساعة',
-      read: true
-    },
-    {
-      id: '5',
-      type: 'review',
-      title: 'مراجعة جديدة',
-      message: 'فاطمة كتبت مراجعة لكتاب في قائمة قراءتك',
-      time: 'منذ ساعتين',
-      read: false
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({ total: 0, unread: 0 });
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchStats();
+  }, [filter]);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const unreadOnly = filter === 'unread';
+      
+      const response = await fetch(`http://localhost:5000/api/notifications?unreadOnly=${unreadOnly}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setNotifications(data.data || []);
+      } else {
+        setError(data.message || 'فشل في جلب الإشعارات');
+      }
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+      setError('حدث خطأ أثناء جلب الإشعارات');
+      // Fallback to sample data
+      setNotifications([
+        {
+          id: '1',
+          type: 'system',
+          title: 'مرحباً بك في كتابي',
+          message: 'مرحباً بك في منصة كتابي! نتمنى لك تجربة قراءة ممتعة',
+          timeAgo: 'منذ دقيقتين',
+          read: false,
+          priority: 'medium'
+        }
+      ]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/notifications/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.data);
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === notificationId ? { ...notif, read: true } : notif
+        )
+      );
+      
+      fetchStats(); // Update stats
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:5000/api/notifications/read-all', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, read: true }))
+      );
+      
+      fetchStats(); // Update stats
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setNotifications(prev => 
+        prev.filter(notif => notif.id !== notificationId)
+      );
+      
+      fetchStats(); // Update stats
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+    }
+  };
+
+  const createTestNotification = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:5000/api/notifications/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          type: 'system',
+          title: 'إشعار تجريبي',
+          message: 'هذا إشعار تجريبي من النظام',
+          priority: 'medium'
+        })
+      });
+
+      fetchNotifications(); // Refresh list
+    } catch (err) {
+      console.error('Error creating test notification:', err);
+    }
+  };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

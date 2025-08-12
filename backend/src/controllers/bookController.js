@@ -125,8 +125,10 @@ class BookController {
    */
   getAllBooks = asyncHandler(async (req, res) => {
     try {
-      // Use in-memory store for development
-      const result = bookStore.getAllBooks(req.query);
+      // Use database first if enabled, otherwise use in-memory store
+      const result = process.env.USE_DATABASE === 'true' 
+        ? await bookService.getAllBooks(req.query)
+        : bookStore.getAllBooks(req.query);
       
       const meta = createPaginationMeta(result.page, result.limit, result.total);
       
@@ -136,9 +138,11 @@ class BookController {
         meta
       ));
     } catch (error) {
-      // Fallback to database if available
+      // Fallback to the other method
       try {
-        const result = await bookService.getAllBooks(req.query);
+        const result = process.env.USE_DATABASE === 'true'
+          ? bookStore.getAllBooks(req.query)
+          : await bookService.getAllBooks(req.query);
         const meta = createPaginationMeta(result.page, result.limit, result.total);
         
         res.json(createSuccessResponse(
@@ -163,29 +167,40 @@ class BookController {
   getBookById = asyncHandler(async (req, res) => {
     const bookId = req.params.id;
     
-    // Try in-memory store first (for development)
-    const book = bookStore.getBook(bookId);
-    
-    if (book) {
-      return res.json(createSuccessResponse(
-        book,
-        'Book retrieved successfully'
-      ));
-    }
-    
-    // If not in memory, try database
     try {
-      const dbBook = await bookService.getBookById(bookId);
-      res.json(createSuccessResponse(
-        dbBook,
-        'Book retrieved successfully'
-      ));
+      // Use database first if enabled, otherwise use in-memory store
+      const book = process.env.USE_DATABASE === 'true'
+        ? await bookService.getBookById(bookId)
+        : bookStore.getBook(bookId);
+        
+      if (book) {
+        return res.json(createSuccessResponse(
+          book,
+          'Book retrieved successfully'
+        ));
+      }
     } catch (error) {
-      res.status(404).json({
-        success: false,
-        message: 'Book not found'
-      });
+      // Fallback to the other method
+      try {
+        const book = process.env.USE_DATABASE === 'true'
+          ? bookStore.getBook(bookId)
+          : await bookService.getBookById(bookId);
+          
+        if (book) {
+          return res.json(createSuccessResponse(
+            book,
+            'Book retrieved successfully'
+          ));
+        }
+      } catch (fallbackError) {
+        // Continue to 404
+      }
     }
+    
+    res.status(404).json({
+      success: false,
+      message: 'Book not found'
+    });
   });
 
   /**
@@ -240,17 +255,21 @@ class BookController {
     const { limit } = req.query;
     
     try {
-      // Use in-memory store first
-      const books = bookStore.getFeaturedBooks(parseInt(limit) || 10);
+      // Use database first if enabled, otherwise use in-memory store
+      const books = process.env.USE_DATABASE === 'true'
+        ? await bookService.getFeaturedBooks(parseInt(limit) || 10)
+        : bookStore.getFeaturedBooks(parseInt(limit) || 10);
       
       res.json(createSuccessResponse(
         books,
         'Featured books retrieved successfully'
       ));
     } catch (error) {
-      // Fallback to database
+      // Fallback to the other method
       try {
-        const books = await bookService.getFeaturedBooks(parseInt(limit) || 10);
+        const books = process.env.USE_DATABASE === 'true'
+          ? bookStore.getFeaturedBooks(parseInt(limit) || 10)
+          : await bookService.getFeaturedBooks(parseInt(limit) || 10);
         res.json(createSuccessResponse(
           books,
           'Featured books retrieved successfully'
@@ -272,20 +291,21 @@ class BookController {
     const { limit, timeframe } = req.query;
     
     try {
-      // Use in-memory store first
-      const books = bookStore.getPopularBooks(parseInt(limit) || 10);
+      // Use database first if enabled, otherwise use in-memory store
+      const books = process.env.USE_DATABASE === 'true'
+        ? await bookService.getPopularBooks(parseInt(limit) || 10, timeframe || 'all')
+        : bookStore.getPopularBooks(parseInt(limit) || 10);
       
       res.json(createSuccessResponse(
         books,
         'Popular books retrieved successfully'
       ));
     } catch (error) {
-      // Fallback to database
+      // Fallback to the other method
       try {
-        const books = await bookService.getPopularBooks(
-          parseInt(limit) || 10,
-          timeframe || 'all'
-        );
+        const books = process.env.USE_DATABASE === 'true'
+          ? bookStore.getPopularBooks(parseInt(limit) || 10)
+          : await bookService.getPopularBooks(parseInt(limit) || 10, timeframe || 'all');
         res.json(createSuccessResponse(
           books,
           'Popular books retrieved successfully'

@@ -30,9 +30,7 @@ class BookRepository {
   async findById(id) {
     try {
       const book = await Book.findById(id)
-        .populate('author', 'name bio')
-        .populate('categories', 'name slug')
-        .populate('uploadedBy', 'name username');
+        .populate('addedBy', 'name username');
       return book;
     } catch (error) {
       if (error.name === 'CastError') {
@@ -48,9 +46,7 @@ class BookRepository {
   async findBySlug(slug) {
     try {
       const book = await Book.findOne({ slug })
-        .populate('author', 'name bio')
-        .populate('categories', 'name slug')
-        .populate('uploadedBy', 'name username');
+        .populate('addedBy', 'name username');
       return book;
     } catch (error) {
       throw error;
@@ -70,9 +66,7 @@ class BookRepository {
           runValidators: true 
         }
       )
-      .populate('author', 'name bio')
-      .populate('categories', 'name slug')
-      .populate('uploadedBy', 'name username');
+      .populate('addedBy', 'name username');
 
       if (!book) {
         throw new AppError('Book not found', 404, 'BOOK_NOT_FOUND');
@@ -160,7 +154,12 @@ class BookRepository {
 
       // Filter by status
       if (status) {
-        query.status = status;
+        // Map 'published' to both 'published' and 'approved' for backward compatibility
+        if (status === 'published') {
+          query.status = { $in: ['published', 'approved'] };
+        } else {
+          query.status = status;
+        }
       }
 
       // Filter by featured
@@ -185,9 +184,7 @@ class BookRepository {
       // Execute query
       const [books, total] = await Promise.all([
         Book.find(query)
-          .populate('author', 'name bio')
-          .populate('categories', 'name slug')
-          .populate('uploadedBy', 'name username')
+          .populate('addedBy', 'name username')
           .sort(sort)
           .skip(skip)
           .limit(limit),

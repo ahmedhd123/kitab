@@ -27,6 +27,7 @@ const adminRoutes = require('./routes/admin');
 const freebooksRoutes = require('./routes/freebooks');
 const aiRoutes = require('./routes/ai');
 const epubRoutes = require('./routes/epub');
+const notificationRoutes = require('./routes/notifications');
 
 // Create Express app
 const app = express();
@@ -213,8 +214,17 @@ app.get('/api/health', (req, res) => {
  */
 async function initializeDatabase() {
   try {
-    // For now, we're using sample data instead of database
-    console.log('📚 Using sample data mode - database connection optional');
+    // Check if we should use database
+    const useDatabase = process.env.USE_DATABASE === 'true';
+    
+    if (useDatabase) {
+      console.log('🔄 Connecting to MongoDB...');
+      await DatabaseUtils.connectDB();
+      console.log('✅ Connected to MongoDB successfully!');
+      console.log('📚 Using MongoDB database for persistent storage');
+    } else {
+      console.log('📚 Using sample data mode - database connection optional');
+    }
   } catch (err) {
     console.log('📚 Continuing without database connection - sample data will still work');
     console.log('🔧 Database error:', err.message);
@@ -248,6 +258,9 @@ app.use(`${API_PREFIX}/ai`, aiRoutes);
 
 // EPUB routes
 app.use(`${API_PREFIX}/epub`, epubRoutes);
+
+// Notification routes
+app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 
 // Admin routes
 app.use(`${API_PREFIX}/admin`, adminRoutes);

@@ -14,7 +14,10 @@ export interface Book {
   rating: number;
   ratingsCount: number;
   pages: number;
-  isbn: string;
+  isbn: {
+    isbn10?: string;
+    isbn13?: string;
+  } | string;
   coverImage: string;
   digitalFiles: {
     epub?: {

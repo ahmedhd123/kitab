@@ -4,6 +4,7 @@
  */
 
 const reviewService = require('../services/reviewService');
+const notificationService = require('../services/notificationService');
 const { asyncHandler, createSuccessResponse, createPaginationMeta } = require('../middleware/errorHandler');
 
 class ReviewController {
@@ -12,7 +13,20 @@ class ReviewController {
    * POST /api/reviews
    */
   createReview = asyncHandler(async (req, res) => {
-    const review = await reviewService.createReview(req.body, req.user.id);
+    const review = await reviewService.createReview(req.body, req.user.userId);
+    
+    // Create notification for review
+    try {
+      await notificationService.createReviewNotification({
+        bookId: review.book,
+        reviewerId: req.user.userId,
+        bookTitle: review.bookTitle || 'كتاب جديد',
+        reviewerName: req.user.username || 'مستخدم'
+      });
+    } catch (notificationError) {
+      console.error('Failed to create review notification:', notificationError);
+      // Continue without failing the review creation
+    }
     
     res.status(201).json(createSuccessResponse(
       review,
@@ -57,7 +71,7 @@ class ReviewController {
     const review = await reviewService.updateReview(
       req.params.id,
       req.body,
-      req.user.id,
+      req.user.userId,
       req.user.role
     );
     
@@ -72,7 +86,7 @@ class ReviewController {
    * DELETE /api/reviews/:id
    */
   deleteReview = asyncHandler(async (req, res) => {
-    await reviewService.deleteReview(req.params.id, req.user.id, req.user.role);
+    await reviewService.deleteReview(req.params.id, req.user.userId, req.user.role);
     
     res.json(createSuccessResponse(
       null,
@@ -117,7 +131,7 @@ class ReviewController {
    * GET /api/reviews/my
    */
   getMyReviews = asyncHandler(async (req, res) => {
-    const result = await reviewService.getReviewsByUser(req.user.id, req.query);
+    const result = await reviewService.getReviewsByUser(req.user.userId, req.query);
     
     const meta = createPaginationMeta(result.page, result.limit, result.total);
     
@@ -133,7 +147,7 @@ class ReviewController {
    * GET /api/reviews/book/:bookId/my
    */
   getMyBookReview = asyncHandler(async (req, res) => {
-    const review = await reviewService.getUserBookReview(req.user.id, req.params.bookId);
+    const review = await reviewService.getUserBookReview(req.user.userId, req.params.bookId);
     
     res.json(createSuccessResponse(
       review,
@@ -190,9 +204,9 @@ class ReviewController {
    * POST /api/reviews/:id/helpful
    */
   markReviewHelpful = asyncHandler(async (req, res) => {
-    const review = await reviewService.markReviewHelpful(req.params.id, req.user.id);
+    const review = await reviewService.markReviewHelpful(req.params.id, req.user.userId);
     
-    const isHelpful = review.helpfulUsers.includes(req.user.id);
+    const isHelpful = review.helpfulUsers.includes(req.user.userId);
     
     res.json(createSuccessResponse(
       {
@@ -235,7 +249,7 @@ class ReviewController {
    * GET /api/reviews/my/stats
    */
   getMyReviewStats = asyncHandler(async (req, res) => {
-    const stats = await reviewService.getUserReviewStats(req.user.id);
+    const stats = await reviewService.getUserReviewStats(req.user.userId);
     
     res.json(createSuccessResponse(
       stats,
@@ -274,7 +288,7 @@ class ReviewController {
    * POST /api/reviews/bulk
    */
   bulkCreateReviews = asyncHandler(async (req, res) => {
-    const result = await reviewService.bulkCreateReviews(req.body.reviews, req.user.id);
+    const result = await reviewService.bulkCreateReviews(req.body.reviews, req.user.userId);
     
     res.status(201).json(createSuccessResponse(
       {
@@ -321,7 +335,7 @@ class ReviewController {
    * GET /api/reviews/book/:bookId/can-review
    */
   canReviewBook = asyncHandler(async (req, res) => {
-    const result = await reviewService.canUserReviewBook(req.user.id, req.params.bookId);
+    const result = await reviewService.canUserReviewBook(req.user.userId, req.params.bookId);
     
     res.json(createSuccessResponse(
       result,

@@ -191,7 +191,6 @@ router.get('/books', requireAdmin, async (req, res) => {
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .populate('reviews', 'rating')
       .exec();
 
     const total = await Book.countDocuments(filter);
@@ -377,11 +376,11 @@ router.get('/reviews', requireAdmin, async (req, res) => {
     
     const filter = {};
     if (status && status !== 'all') filter.status = status;
-    if (bookId) filter.bookId = bookId;
+    if (bookId) filter.book = bookId;
 
     const reviews = await Review.find(filter)
-      .populate('userId', 'name email')
-      .populate('bookId', 'title author')
+      .populate('user', 'username email profile.firstName profile.lastName')
+      .populate('book', 'title authors')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)

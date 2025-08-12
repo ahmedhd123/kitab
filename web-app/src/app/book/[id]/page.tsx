@@ -26,6 +26,7 @@ export default function BookDetails({ params }: { params: Promise<{ id: string }
   const [reviewText, setReviewText] = useState('');
   const [liked, setLiked] = useState(false);
   const [bookId, setBookId] = useState<string | null>(null);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Handle async params
   useEffect(() => {
@@ -93,6 +94,47 @@ export default function BookDetails({ params }: { params: Promise<{ id: string }
       );
     }
     return stars;
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewText.trim() || userRating === 0) {
+      alert('يرجى إضافة تقييم ونص المراجعة');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          bookId: bookId,
+          rating: userRating,
+          reviewText: reviewText.trim(),
+          title: `مراجعة كتاب ${book?.title || 'غير معروف'}`
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('تم نشر مراجعتك بنجاح!');
+        setReviewText('');
+        setShowReviewForm(false);
+        // يمكن إضافة إعادة تحميل المراجعات هنا
+      } else {
+        alert(`خطأ: ${data.message || 'فشل في نشر المراجعة'}`);
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('حدث خطأ أثناء نشر المراجعة');
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   if (shouldShowLoading) {
@@ -239,7 +281,7 @@ export default function BookDetails({ params }: { params: Promise<{ id: string }
                   </div>
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4" />
-                    ISBN: {book.isbn || 'غير محدد'}
+                    ISBN: {typeof book.isbn === 'string' ? book.isbn : (book.isbn?.isbn13 || book.isbn?.isbn10 || 'غير محدد')}
                   </div>
                 </div>
 
@@ -284,11 +326,16 @@ export default function BookDetails({ params }: { params: Promise<{ id: string }
                       <button
                         onClick={() => setShowReviewForm(false)}
                         className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                        disabled={isSubmittingReview}
                       >
                         إلغاء
                       </button>
-                      <button className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                        نشر المراجعة
+                      <button 
+                        onClick={handleSubmitReview}
+                        disabled={isSubmittingReview || !reviewText.trim()}
+                        className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmittingReview ? 'جاري النشر...' : 'نشر المراجعة'}
                       </button>
                     </div>
                   </div>

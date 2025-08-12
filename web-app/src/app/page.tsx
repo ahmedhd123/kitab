@@ -292,54 +292,54 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* دعاء الكروان - طه حسين */}
             <Link href="/book/7" className="group cursor-pointer block">
-              <div className="relative overflow-hidden rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
+              <div className="relative overflow-hidden rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-600/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                 
                 <img
-                  src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=800&fit=crop"
+                  src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop"
                   alt="دعاء الكروان"
-                  className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 
-                <div className="absolute top-6 right-6 z-20">
-                  <span className="px-4 py-2 bg-amber-100/95 dark:bg-amber-800/95 backdrop-blur-sm rounded-full text-sm font-medium text-amber-800 dark:text-amber-200 shadow-lg">
+                <div className="absolute top-3 right-3 z-20">
+                  <span className="px-2 py-1 bg-amber-100/95 dark:bg-amber-800/95 backdrop-blur-sm rounded-full text-xs font-medium text-amber-800 dark:text-amber-200 shadow-lg">
                     أدب عربي كلاسيكي
                   </span>
                 </div>
                 
-                <div className="absolute top-6 left-6 z-20">
+                <div className="absolute top-3 left-3 z-20">
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       // Handle add to favorites
                     }}
-                    className="p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
+                    className="p-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
                   >
-                    <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
+                    <Heart className="w-4 h-4 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
                   </button>
                 </div>
                 
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white z-20">
-                  <h3 className="font-bold text-2xl mb-2">دعاء الكروان</h3>
-                  <p className="text-gray-200 text-lg mb-4">طه حسين</p>
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">رواية مؤثرة تحكي قصة حب وألم في الريف المصري، من روائع الأدب العربي الحديث</p>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 text-white z-20">
+                  <h3 className="font-bold text-sm mb-1">دعاء الكروان</h3>
+                  <p className="text-gray-200 text-xs mb-2">طه حسين</p>
+                  <p className="text-gray-300 text-xs mb-2 line-clamp-2">رواية مؤثرة تحكي قصة حب وألم في الريف المصري</p>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <div className="flex items-center space-x-1 rtl:space-x-reverse">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Star 
                             key={i} 
-                            className={`w-4 h-4 ${i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
+                            className={`w-3 h-3 ${i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
                           />
                         ))}
                       </div>
-                      <span className="text-sm font-medium">4.9</span>
+                      <span className="text-xs font-medium">4.9</span>
                     </div>
-                    <span className="text-sm text-gray-300">1,563 تقييم</span>
+                    <span className="text-xs text-gray-300">1,563</span>
                   </div>
                 </div>
               </div>
@@ -347,51 +347,51 @@ export default function Home() {
 
             {/* مدن الملح - عبد الرحمن منيف */}
             <Link href="/book/8" className="group cursor-pointer block">
-              <div className="relative overflow-hidden rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
+              <div className="relative overflow-hidden rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-600/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                 
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop"
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop"
                   alt="مدن الملح"
-                  className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 
-                <div className="absolute top-6 right-6 z-20">
-                  <span className="px-4 py-2 bg-amber-100/95 dark:bg-amber-800/95 backdrop-blur-sm rounded-full text-sm font-medium text-amber-800 dark:text-amber-200 shadow-lg">
+                <div className="absolute top-3 right-3 z-20">
+                  <span className="px-2 py-1 bg-amber-100/95 dark:bg-amber-800/95 backdrop-blur-sm rounded-full text-xs font-medium text-amber-800 dark:text-amber-200 shadow-lg">
                     أدب عربي معاصر
                   </span>
                 </div>
                 
-                <div className="absolute top-6 left-6 z-20">
+                <div className="absolute top-3 left-3 z-20">
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       // Handle add to favorites
                     }}
-                    className="p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
+                    className="p-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
                   >
-                    <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
+                    <Heart className="w-4 h-4 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
                   </button>
                 </div>
                 
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white z-20">
-                  <h3 className="font-bold text-2xl mb-2">مدن الملح</h3>
-                  <p className="text-gray-200 text-lg mb-4">عبد الرحمن منيف</p>
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">ملحمة روائية خماسية تصور التحولات الاجتماعية والثقافية في المنطقة العربية</p>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 text-white z-20">
+                  <h3 className="font-bold text-sm mb-1">مدن الملح</h3>
+                  <p className="text-gray-200 text-xs mb-2">عبد الرحمن منيف</p>
+                  <p className="text-gray-300 text-xs mb-2 line-clamp-2">ملحمة روائية خماسية تصور التحولات الاجتماعية</p>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <div className="flex items-center space-x-1 rtl:space-x-reverse">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Star 
                             key={i} 
-                            className={`w-4 h-4 ${i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
+                            className={`w-3 h-3 ${i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
                           />
                         ))}
                       </div>
-                      <span className="text-sm font-medium">4.8</span>
+                      <span className="text-xs font-medium">4.8</span>
                     </div>
-                    <span className="text-sm text-gray-300">987 تقييم</span>
+                    <span className="text-xs text-gray-300">987</span>
                   </div>
                 </div>
               </div>
@@ -426,19 +426,19 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {loading ? (
               // Enhanced loading skeleton
               [...Array(6)].map((_, index) => (
                 <div key={index} className="group animate-pulse">
-                  <div className="relative overflow-hidden rounded-3xl shadow-lg">
-                    <div className="bg-gradient-to-br from-gray-300 to-gray-400 h-96 w-full"></div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                      <div className="bg-gray-300 h-6 rounded mb-2"></div>
-                      <div className="bg-gray-300 h-4 rounded w-3/4 mb-4"></div>
+                  <div className="relative overflow-hidden rounded-2xl shadow-lg">
+                    <div className="bg-gradient-to-br from-gray-300 to-gray-400 h-48 w-full"></div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <div className="bg-gray-300 h-4 rounded mb-2"></div>
+                      <div className="bg-gray-300 h-3 rounded w-3/4 mb-3"></div>
                       <div className="flex justify-between">
-                        <div className="bg-gray-300 h-4 rounded w-16"></div>
-                        <div className="bg-gray-300 h-4 rounded w-20"></div>
+                        <div className="bg-gray-300 h-3 rounded w-12"></div>
+                        <div className="bg-gray-300 h-3 rounded w-16"></div>
                       </div>
                     </div>
                   </div>
@@ -447,53 +447,53 @@ export default function Home() {
             ) : nonArabicBooks.length > 0 ? (
               nonArabicBooks.slice(0, 6).map((book) => (
                 <Link key={book.id} href={`/book/${book.id}`} className="group cursor-pointer block">
-                  <div className="relative overflow-hidden rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
+                  <div className="relative overflow-hidden rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 transform group-hover:scale-105">
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                     
                     <img
                       src={book.coverImage}
                       alt={book.title}
-                      className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
                       onError={(e) => {
-                        e.currentTarget.src = `https://via.placeholder.com/400x600/6366f1/white?text=${encodeURIComponent(book.title)}`;
+                        e.currentTarget.src = `https://via.placeholder.com/200x300/6366f1/white?text=${encodeURIComponent(book.title)}`;
                       }}
                     />
                     
-                    <div className="absolute top-6 right-6 z-20">
-                      <span className="px-4 py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 shadow-lg">
+                    <div className="absolute top-3 right-3 z-20">
+                      <span className="px-2 py-1 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 shadow-lg">
                         {book.genres[0] || 'كتاب'}
                       </span>
                     </div>
                     
-                    <div className="absolute top-6 left-6 z-20">
+                    <div className="absolute top-3 left-3 z-20">
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           // Handle add to favorites
                         }}
-                        className="p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
+                        className="p-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
                       >
-                        <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
+                        <Heart className="w-4 h-4 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors" />
                       </button>
                     </div>
                     
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white z-20">
-                      <h3 className="font-bold text-xl mb-2 line-clamp-2">{book.titleArabic || book.title}</h3>
-                      <p className="text-gray-200 text-base mb-4">{book.authorArabic || book.author}</p>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 text-white z-20">
+                      <h3 className="font-bold text-sm mb-1 line-clamp-2">{book.titleArabic || book.title}</h3>
+                      <p className="text-gray-200 text-xs mb-2">{book.authorArabic || book.author}</p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <div className="flex items-center space-x-1 rtl:space-x-reverse">
                           <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
                               <Star 
                                 key={i} 
-                                className={`w-4 h-4 ${i < Math.floor(book.rating) ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
+                                className={`w-3 h-3 ${i < Math.floor(book.rating) ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} 
                               />
                             ))}
                           </div>
-                          <span className="text-sm font-medium">{(book.rating || 0).toFixed(1)}</span>
+                          <span className="text-xs font-medium">{(book.rating || 0).toFixed(1)}</span>
                         </div>
-                        <span className="text-sm text-gray-300">{book.ratingsCount} تقييم</span>
+                        <span className="text-xs text-gray-300">{book.ratingsCount}</span>
                       </div>
                     </div>
                   </div>

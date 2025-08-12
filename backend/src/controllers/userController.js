@@ -13,7 +13,7 @@ class UserController {
    * @access  Private
    */
   getProfile = asyncHandler(async (req, res) => {
-    const user = await userService.getProfile(req.user.id);
+    const user = await userService.getProfile(req.user.userId);
     
     res.status(200).json(
       createSuccessResponse(user, 'Profile retrieved successfully')
@@ -26,7 +26,7 @@ class UserController {
    * @access  Private
    */
   updateProfile = asyncHandler(async (req, res) => {
-    const user = await userService.updateProfile(req.user.id, req.body);
+    const user = await userService.updateProfile(req.user.userId, req.body);
     
     res.status(200).json(
       createSuccessResponse(user, 'Profile updated successfully')
@@ -41,7 +41,7 @@ class UserController {
   changePassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     
-    const user = await userService.changePassword(req.user.id, oldPassword, newPassword);
+    const user = await userService.changePassword(req.user.userId, oldPassword, newPassword);
     
     res.status(200).json(
       createSuccessResponse(user, 'Password changed successfully')
@@ -54,7 +54,7 @@ class UserController {
    * @access  Private
    */
   getUserActivity = asyncHandler(async (req, res) => {
-    const activity = await userService.getUserActivity(req.user.id);
+    const activity = await userService.getUserActivity(req.user.userId);
     
     res.status(200).json(
       createSuccessResponse(activity, 'User activity retrieved successfully')
@@ -67,7 +67,7 @@ class UserController {
    * @access  Private
    */
   updatePreferences = asyncHandler(async (req, res) => {
-    const user = await userService.updatePreferences(req.user.id, req.body);
+    const user = await userService.updatePreferences(req.user.userId, req.body);
     
     res.status(200).json(
       createSuccessResponse(user, 'Preferences updated successfully')
@@ -80,7 +80,7 @@ class UserController {
    * @access  Private
    */
   deactivateAccount = asyncHandler(async (req, res) => {
-    const user = await userService.deactivateAccount(req.user.id);
+    const user = await userService.deactivateAccount(req.user.userId);
     
     res.status(200).json(
       createSuccessResponse(user, 'Account deactivated successfully')

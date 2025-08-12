@@ -213,7 +213,7 @@ export default function BookDetails({ params }: { params: { id: string } }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4" />
-                    ISBN: {book.isbn}
+                    ISBN: {typeof book.isbn === 'string' ? book.isbn : (book.isbn?.isbn13 || book.isbn?.isbn10 || 'غير محدد')}
                   </div>
                 </div>
 

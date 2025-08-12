@@ -68,7 +68,7 @@ export default function BookFileManager({ bookId }: { bookId: string }) {
 
   const fetchBookFiles = async () => {
     try {
-      const response = await fetch(`/api/books/${bookId}`);
+      const response = await fetch(`http://localhost:5000/api/books/${bookId}`);
       const data = await response.json();
       
       if (data.success && data.data.digitalFiles) {
@@ -213,7 +213,7 @@ export default function BookFileManager({ bookId }: { bookId: string }) {
 
   const handleDownload = async (format: string) => {
     try {
-      const response = await fetch(`/api/books/${bookId}/download/${format}`, {
+      const response = await fetch(`http://localhost:5000/api/books/${bookId}/download/${format}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -248,7 +248,7 @@ export default function BookFileManager({ bookId }: { bookId: string }) {
     }
 
     try {
-      const response = await fetch(`/api/books/${bookId}/files/${format}`, {
+      const response = await fetch(`http://localhost:5000/api/books/${bookId}/files/${format}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

@@ -96,7 +96,7 @@ export default function BookDownloads({
     setDownloading(format);
 
     try {
-      const response = await fetch(`/api/books/${bookId}/download/${format}`, {
+      const response = await fetch(`http://localhost:5000/api/books/${bookId}/download/${format}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

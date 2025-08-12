@@ -5,17 +5,16 @@ import { Platform } from 'react-native';
 
 // API Configuration
 const API_CONFIG = {
-  // Development URLs
-  local: Platform.OS === 'ios' ? 'http://localhost:5000' : 'http://10.0.2.2:5000',
+  // Development URLs - Updated for current network
+  local: Platform.OS === 'ios' ? 'http://192.168.0.152:5000' : 'http://192.168.0.152:5000',
+  localhost: Platform.OS === 'ios' ? 'http://localhost:5000' : 'http://10.0.2.2:5000',
   // Production URL (replace with your domain)
   production: 'https://api.kitabi.com',
   
-  // Use local for development, production for release
-  baseURL: __DEV__ ? 
-    (Platform.OS === 'ios' ? 'http://localhost:5000' : 'http://10.0.2.2:5000') :
-    'https://api.kitabi.com',
+  // Use network IP for testing on real devices
+  baseURL: __DEV__ ? 'http://192.168.0.152:5000' : 'https://api.kitabi.com',
   
-  timeout: 10000,
+  timeout: 15000, // Increased timeout for mobile
   headers: {
     'Content-Type': 'application/json',
   }

@@ -43,7 +43,7 @@ const FreeBooksImport: React.FC = () => {
 
   const loadFeaturedBooks = async () => {
     try {
-      const response = await fetch('/api/freebooks/featured?limit=12', {
+      const response = await fetch('http://localhost:5000/api/freebooks/featured?limit=12', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -90,7 +90,7 @@ const FreeBooksImport: React.FC = () => {
   const importBook = async (book: FreeBook) => {
     setIsImporting(book.id);
     try {
-      const response = await fetch('/api/freebooks/import', {
+      const response = await fetch('http://localhost:5000/api/freebooks/import', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

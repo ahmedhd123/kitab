@@ -44,7 +44,7 @@ export function useBook(id: string) {
         
         try {
           // Fallback to frontend API
-          const fallbackResponse = await fetch('/api/books/sample');
+          const fallbackResponse = await fetch('http://localhost:5000/api/books/sample');
           const fallbackData = await fallbackResponse.json();
           
           if (fallbackData.success) {

@@ -14,7 +14,7 @@ class ReviewService {
    */
   async createReview(reviewData, userId) {
     try {
-      const { bookId, rating, title, content } = reviewData;
+      const { book: bookId, rating, title, content, readingStatus } = reviewData;
 
       // Verify book exists
       const book = await bookRepository.findById(bookId);

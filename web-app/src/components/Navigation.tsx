@@ -58,7 +58,6 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
   const navigationItems = [
     { id: 'home', label: 'الرئيسية', icon: Home, href: '/' },
     { id: 'explore', label: 'استكشاف', icon: Compass, href: '/explore' },
-    { id: 'arabic', label: 'أدب عربي', icon: BookOpen, href: '/explore?category=arabic', featured: true },
     { id: 'library', label: 'مكتبتي', icon: Library, href: '/library' },
     { id: 'favorites', label: 'المفضلة', icon: Heart, href: '/favorites' },
   ];
@@ -96,22 +95,13 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
                   key={item.id}
                   href={item.href}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors relative ${
-                    item.featured
-                      ? isActive
-                        ? 'bg-amber-100 text-amber-800 shadow-sm'
-                        : 'text-amber-600 hover:text-amber-700 hover:bg-amber-50 shadow-sm border border-amber-200'
-                      : isActive
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
+                    isActive
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
-                  {item.featured && !isActive && (
-                    <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      ⭐
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -254,21 +244,14 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
                     key={item.id}
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-3 transition-colors relative ${
-                      item.featured
-                        ? isActive
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'text-amber-600 hover:bg-amber-50 border-r-4 border-amber-300'
-                        : isActive
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'text-gray-600 hover:bg-gray-100'
+                      isActive
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'text-gray-600 hover:bg-gray-100'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{item.label}</span>
-                    {item.featured && (
-                      <span className="text-xs bg-amber-500 text-white px-2 py-1 rounded-full">جديد</span>
-                    )}
                   </Link>
                 );
               })}

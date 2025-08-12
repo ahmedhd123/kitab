@@ -42,7 +42,7 @@ export default function RegisterPage() {
         .substring(0, 20) // Limit length
         || 'user' + Date.now().toString().slice(-6); // Fallback if name is empty or all special chars
 
-      const response = await fetch('http://localhost:5002/api/auth/register', {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

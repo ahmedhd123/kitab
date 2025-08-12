@@ -5,6 +5,52 @@ const mongoose = require('mongoose');
  */
 class DatabaseUtils {
   /**
+   * Connect to MongoDB
+   * @returns {Promise<void>} Connection promise
+   */
+  static async connectDB() {
+    try {
+      const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/kitabi';
+      
+      await mongoose.connect(mongoUri, {
+        maxPoolSize: 10, // Maintain up to 10 socket connections
+        serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+        socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      });
+
+      console.log(`✅ MongoDB Connected: ${mongoUri}`);
+      
+      // Setup connection event listeners
+      mongoose.connection.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
+      });
+
+      mongoose.connection.on('disconnected', () => {
+        console.log('⚠️ MongoDB disconnected');
+      });
+
+      return true;
+    } catch (error) {
+      console.error('❌ MongoDB connection failed:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Disconnect from MongoDB
+   * @returns {Promise<void>} Disconnection promise
+   */
+  static async disconnectDB() {
+    try {
+      await mongoose.disconnect();
+      console.log('🔌 MongoDB disconnected successfully');
+    } catch (error) {
+      console.error('❌ MongoDB disconnection error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
    * Check if MongoDB is connected
    * @returns {boolean} Connection status
    */

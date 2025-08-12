@@ -34,7 +34,10 @@ interface Book {
   genre: string;
   language: string;
   publishYear?: number;
-  isbn?: string;
+  isbn?: {
+    isbn10?: string;
+    isbn13?: string;
+  } | string;
   pages?: number;
   publisher?: string;
   tags: string[];
@@ -350,7 +353,9 @@ const BookDetailsPage = () => {
                 {book.isbn && (
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">ISBN</span>
-                    <span className="text-sm font-medium text-gray-900">{book.isbn}</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {typeof book.isbn === 'string' ? book.isbn : (book.isbn?.isbn13 || book.isbn?.isbn10 || 'غير محدد')}
+                    </span>
                   </div>
                 )}
                 
