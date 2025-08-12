@@ -86,3 +86,4 @@ test-*.html
 # Lock files (optional - keep for reproducible builds)
 # package-lock.json
 # yarn.lock
+.vercel

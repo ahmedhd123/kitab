@@ -1,0 +1,36 @@
+{
+  "successful": [],
+  "failed": [
+    {
+      "title": "تهافت الفلاسفة",
+      "author": "أبو حامد الغزالي",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "title": "فصل المقال فيما بين الحكمة والشريعة من الاتصال",
+      "author": "ابن رشد (أفيروس)",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "title": "الشفاء - الإلهيات",
+      "author": "ابن سينا (أفيسنا)",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "title": "مقدمة ابن خلدون",
+      "author": "عبد الرحمن ابن خلدون",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "title": "رسائل إخوان الصفا",
+      "author": "إخوان الصفا",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "title": "المنقذ من الضلال",
+      "author": "أبو حامد الغزالي",
+      "error": "Request failed with status code 401"
+    }
+  ],
+  "total": 6
+}

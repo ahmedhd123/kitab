@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-08-12T19:43:23.253Z",
+  "apiUrl": "https://kitab-onbiiu6tn-ahmedhd123s-projects.vercel.app/api/admin/books",
+  "totalBooks": 6,
+  "successful": 0,
+  "failed": 6,
+  "results": [
+    {
+      "success": false,
+      "book": "تهافت الفلاسفة",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "success": false,
+      "book": "فصل المقال فيما بين الحكمة والشريعة من الاتصال",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "success": false,
+      "book": "الشفاء - الإلهيات",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "success": false,
+      "book": "مقدمة ابن خلدون",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "success": false,
+      "book": "رسائل إخوان الصفا",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "success": false,
+      "book": "المنقذ من الضلال",
+      "error": "Request failed with status code 401"
+    }
+  ]
+}
