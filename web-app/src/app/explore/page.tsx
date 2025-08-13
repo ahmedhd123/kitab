@@ -9,7 +9,7 @@ import {
   Award, Globe, Sparkles, ArrowRight, Eye, Calendar
 } from 'lucide-react';
 import Navigation from '../../components/Navigation';
-import { useBooks } from '../../hooks/useBooks';
+import { useBooks } from '@/hooks/useBooks';
 
 interface FilterState {
   genres: string[];

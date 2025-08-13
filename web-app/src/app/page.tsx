@@ -4,19 +4,25 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Search, TrendingUp, Users, Sparkles, ArrowRight, Star, Heart, MessageCircle, BookMarked, Users2, Award, Globe, UserPlus, LogIn } from 'lucide-react';
-import Navigation from '../components/Navigation';
-import { useBooks } from '../hooks/useBooks';
-import { isAuthenticated as checkAuthStatus } from '../utils/auth';
+import Navigation from '@/components/Navigation';
+import { useBooks } from '@/hooks/useBooks';
+import { isAuthenticated as checkAuthStatus } from '@/utils/auth';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   
-  // Get non-Arabic books for featured section
-  const { books: featuredBooks, loading, error } = useBooks({ limit: 6 });
+  // Ensure client-side only
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  // Get non-Arabic books for featured section - only on client
+  const { books: featuredBooks, loading, error } = isClient ? useBooks({ limit: 6 }) : { books: [], loading: true, error: null };
   const nonArabicBooks = featuredBooks.filter(book => !book.genres.includes('أدب عربي'));
 
   const handleSearch = () => {

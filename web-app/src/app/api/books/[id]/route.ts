@@ -2,19 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://kitab-production.up.railway.app';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const params = new URLSearchParams();
-    
-    // Forward all query parameters to backend
-    searchParams.forEach((value, key) => {
-      params.append(key, value);
-    });
+    const { id } = await params;
 
     // Forward request to Railway backend
-    const backendResponse = await fetch(`${BACKEND_URL}/api/books?${params}`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/books/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -33,9 +29,9 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching books:', error);
+    console.error('Error fetching book:', error);
     return NextResponse.json(
-      { success: false, message: 'خطأ في جلب بيانات الكتب' },
+      { success: false, message: 'خطأ في جلب بيانات الكتاب' },
       { 
         status: 500,
         headers: {

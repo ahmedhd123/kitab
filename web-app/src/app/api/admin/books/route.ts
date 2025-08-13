@@ -1,275 +1,137 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Import the shared books array and addBook function
-let books: any[] = [
-  {
-    _id: '1',
-    title: 'الأسود يليق بك',
-    author: 'أحلام مستغانمي',
-    description: 'رواية عربية رائعة تتناول قضايا المجتمع المعاصر',
-    genre: 'الأدب العربي',
-    language: 'arabic',
-    publishYear: '2012',
-    isbn: '978-1-234567-89-0',
-    pages: '320',
-    publisher: 'دار الآداب',
-    tags: ['رواية', 'أدب عربي', 'معاصر'],
-    status: 'published',
-    isFree: true,
-    price: '0',
-    coverImage: '/images/books/cover1.jpg',
-    files: {
-      epub: { available: true, size: 1024000 },
-      pdf: { available: true, size: 2048000 }
-    },
-    rating: 4.8,
-    reviewCount: 245,
-    downloadCount: 1247,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    uploadedBy: 'admin'
-  },
-  {
-    _id: '2',
-    title: 'ذاكرة الجسد',
-    author: 'أحلام مستغانمي',
-    description: 'رواية تاريخية تجمع بين الحب والوطن',
-    genre: 'الأدب العربي',
-    language: 'arabic',
-    publishYear: '1993',
-    isbn: '978-1-234567-89-1',
-    pages: '280',
-    publisher: 'دار الآداب',
-    tags: ['رواية', 'تاريخ', 'حب'],
-    status: 'published',
-    isFree: true,
-    price: '0',
-    coverImage: '/images/books/cover2.jpg',
-    files: {
-      epub: { available: true, size: 987000 },
-      pdf: { available: true, size: 1876000 }
-    },
-    rating: 4.7,
-    reviewCount: 189,
-    downloadCount: 987,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    uploadedBy: 'admin'
-  }
-];
-
-let nextId = 3;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://kitab-production.up.railway.app';
 
 export async function GET(request: NextRequest) {
   try {
-    // Add CORS headers
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    };
-
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const search = searchParams.get('search');
-    const genre = searchParams.get('genre');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const params = new URLSearchParams();
+    
+    // Forward all query parameters to backend
+    searchParams.forEach((value, key) => {
+      params.append(key, value);
+    });
 
-    // Filter books
-    let filteredBooks = [...books];
+    // Get authorization header
+    const authHeader = request.headers.get('authorization');
+    
+    // Forward request to Railway backend
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/books?${params}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
+      },
+    });
 
-    if (status) {
-      filteredBooks = filteredBooks.filter(book => book.status === status);
-    }
+    const data = await backendResponse.json();
 
-    if (search) {
-      filteredBooks = filteredBooks.filter(book => 
-        book.title.toLowerCase().includes(search.toLowerCase()) ||
-        book.author.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (genre) {
-      filteredBooks = filteredBooks.filter(book => book.genre === genre);
-    }
-
-    // Pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedBooks = filteredBooks.slice(startIndex, endIndex);
-
-    const totalBooks = filteredBooks.length;
-    const totalPages = Math.ceil(totalBooks / limit);
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        books: paginatedBooks,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalBooks,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1
-        }
-      }
-    }, { headers });
+    return NextResponse.json(data, {
+      status: backendResponse.status,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
 
   } catch (error) {
     console.error('Error fetching books:', error);
     return NextResponse.json(
+      { success: false, message: 'خطأ في جلب بيانات الكتب' },
       { 
-        success: false, 
-        message: 'حدث خطأ أثناء جلب الكتب' 
-      },
-      { status: 500 }
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      }
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    };
-
-    // Check authorization
+    // Get authorization header
     const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    
+    if (!authHeader) {
       return NextResponse.json(
-        { success: false, message: 'غير مصرح بالوصول' },
-        { status: 401, headers }
+        { success: false, message: 'غير مصرح بالدخول' },
+        { status: 401 }
       );
     }
 
-    const contentType = request.headers.get('content-type');
-    let bookData: any;
+    // Get form data
+    const formData = await request.formData();
+    
+    console.log('📚 Sending book creation request to Railway backend');
+    
+    // Forward request to Railway backend
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/books`, {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+      },
+      body: formData,
+    });
 
-    if (contentType && contentType.includes('application/json')) {
-      // Handle JSON data
-      const jsonData = await request.json();
-      bookData = {
-        _id: String(nextId++),
-        title: jsonData.title,
-        author: jsonData.author,
-        description: jsonData.description,
-        genre: jsonData.genre,
-        language: jsonData.language || 'arabic',
-        publishYear: jsonData.publishYear || '',
-        isbn: jsonData.isbn || '',
-        pages: jsonData.pages || '',
-        publisher: jsonData.publisher || '',
-        tags: Array.isArray(jsonData.tags) ? jsonData.tags : (jsonData.tags ? [jsonData.tags] : []),
-        status: jsonData.status || 'draft',
-        isFree: jsonData.isFree === true || jsonData.isFree === 'true',
-        price: jsonData.price || '0',
-        coverImage: `/images/books/cover${nextId}.jpg`,
-        files: {},
-        rating: 0,
-        reviewCount: 0,
-        downloadCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        uploadedBy: 'admin'
-      };
-    } else {
-      // Handle FormData
-      const formData = await request.formData();
-      bookData = {
-        _id: String(nextId++),
-        title: formData.get('title') as string,
-        author: formData.get('author') as string,
-        description: formData.get('description') as string,
-        genre: formData.get('genre') as string,
-        language: formData.get('language') as string || 'arabic',
-        publishYear: formData.get('publishYear') as string || '',
-        isbn: formData.get('isbn') as string || '',
-        pages: formData.get('pages') as string || '',
-        publisher: formData.get('publisher') as string || '',
-        tags: JSON.parse(formData.get('tags') as string || '[]'),
-        status: formData.get('status') as string || 'draft',
-        isFree: formData.get('isFree') === 'true',
-        price: formData.get('price') as string || '0',
-        coverImage: `/images/books/cover${nextId}.jpg`,
-        files: {},
-        rating: 0,
-        reviewCount: 0,
-        downloadCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        uploadedBy: 'admin'
-      };
+    const responseText = await backendResponse.text();
+    console.log('📝 Railway response:', responseText);
 
-      // Process file uploads (mock implementation)
-      const fileTypes = ['epub', 'mobi', 'pdf', 'audiobook'];
-      const files: any = {};
-      
-      fileTypes.forEach(type => {
-        const file = formData.get(`files[${type}]`) as File;
-        if (file) {
-          files[type] = {
-            available: true,
-            size: file.size,
-            originalName: file.name,
-            url: `/api/books/${bookData._id}/files/${type}`
-          };
-        }
-      });
-
-      bookData.files = files;
-    }
-
-    // Validate required fields
-    if (!bookData.title?.trim()) {
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('❌ JSON parse error:', parseError);
       return NextResponse.json(
-        { success: false, message: 'عنوان الكتاب مطلوب' },
-        { status: 400, headers }
+        { 
+          success: false, 
+          message: 'خطأ في تحليل البيانات من الخادم',
+          details: responseText.substring(0, 200)
+        },
+        { status: 500 }
       );
     }
 
-    if (!bookData.author?.trim()) {
-      return NextResponse.json(
-        { success: false, message: 'اسم المؤلف مطلوب' },
-        { status: 400, headers }
-      );
+    console.log('📝 Parsed Railway result:', data);
+
+    if (data.success) {
+      console.log('✅ Book created successfully:', data.data?.title);
     }
 
-    if (!bookData.genre) {
-      return NextResponse.json(
-        { success: false, message: 'نوع الكتاب مطلوب' },
-        { status: 400, headers }
-      );
-    }
-
-    // Add to mock database
-    books.push(bookData);
-
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return NextResponse.json({
-      success: true,
-      message: bookData.status === 'published' ? 'تم نشر الكتاب بنجاح' : 'تم حفظ الكتاب كمسودة',
-      data: bookData
-    }, { headers });
+    return NextResponse.json(data, {
+      status: backendResponse.status,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
 
   } catch (error) {
-    console.error('Error creating book:', error);
+    console.error('❌ Error creating book:', error);
     return NextResponse.json(
       { 
         success: false, 
-        message: 'حدث خطأ أثناء إنشاء الكتاب' 
+        message: 'خطأ في إضافة الكتاب',
+        details: error instanceof Error ? error.message : 'خطأ غير معروف'
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      }
     );
   }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Book } from './useBooks';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://kitab-production.up.railway.app';
+
 export function useBook(id: string) {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,48 +21,51 @@ export function useBook(id: string) {
         setLoading(true);
         setError(null);
 
-        // Create a timeout promise for faster fallback
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('timeout')), 2000)
-        );
-
-        // Try to get specific book from sample API with timeout
-        const fetchPromise = fetch(`http://localhost:5000/api/books/sample/${id}`);
-        
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            setBook(data.data);
-          } else {
-            setError(data.message || 'الكتاب غير موجود');
+        // Try frontend API first (most reliable)
+        const frontendResponse = await fetch(`/api/books/${id}`);
+        if (frontendResponse.ok) {
+          const frontendData = await frontendResponse.json();
+          if (frontendData.success && frontendData.data) {
+            setBook(frontendData.data);
+            return;
           }
-        } else {
-          throw new Error('Backend not available');
         }
-      } catch (err: any) {
-        console.log('Primary API failed, trying fallback:', err.message);
-        
-        try {
-          // Fallback to frontend API
-          const fallbackResponse = await fetch('http://localhost:5000/api/books/sample');
-          const fallbackData = await fallbackResponse.json();
-          
-          if (fallbackData.success) {
-            const foundBook = fallbackData.data.books.find((b: Book) => b.id === id);
+
+        // Fallback: get all books and find the one we need
+        const allBooksResponse = await fetch('/api/books');
+        if (allBooksResponse.ok) {
+          const allBooksData = await allBooksResponse.json();
+          if (allBooksData.success && allBooksData.data) {
+            const foundBook = allBooksData.data.find((b: Book) => 
+              b._id === id || b.id === id || String(b._id) === id || String(b.id) === id
+            );
             if (foundBook) {
               setBook(foundBook);
-            } else {
-              setError('الكتاب غير موجود');
+              return;
             }
-          } else {
-            setError('خطأ في جلب بيانات الكتاب');
           }
-        } catch (fallbackErr) {
-          console.error('useBook: Fallback also failed:', fallbackErr);
-          setError('خطأ في الاتصال بالخادم');
         }
+
+        // Last fallback: try admin books API
+        const adminResponse = await fetch(`/api/admin/books`);
+        if (adminResponse.ok) {
+          const adminData = await adminResponse.json();
+          if (adminData.success && adminData.data) {
+            const foundBook = adminData.data.find((b: Book) => 
+              b._id === id || b.id === id || String(b._id) === id || String(b.id) === id
+            );
+            if (foundBook) {
+              setBook(foundBook);
+              return;
+            }
+          }
+        }
+
+        setError('لم يتم العثور على الكتاب');
+        
+      } catch (err: any) {
+        console.error('Error fetching book:', err);
+        setError('فشل في تحميل تفاصيل الكتاب');
       } finally {
         setLoading(false);
       }

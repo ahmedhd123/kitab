@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import { useToast } from '@/components/ToastProvider';
+import { useLocalBooks } from '@/hooks/useLocalBooks';
 import {
   BookOpenIcon,
   PhotoIcon,
@@ -40,6 +41,7 @@ interface BookForm {
 const NewBookPage = () => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useToast();
+  const { saveBook, saving: savingLocal } = useLocalBooks();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentTag, setCurrentTag] = useState('');
@@ -198,6 +200,27 @@ const NewBookPage = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        // Save locally as backup
+        const bookForLocal = {
+          _id: data.data._id,
+          id: data.data._id,
+          title: formData.title,
+          author: formData.author,
+          description: formData.description,
+          genre: formData.genre,
+          language: formData.language,
+          publishYear: parseInt(formData.publishYear) || new Date().getFullYear(),
+          isbn: formData.isbn,
+          pages: parseInt(formData.pages) || 0,
+          publisher: formData.publisher,
+          tags: formData.tags,
+          status: isDraft ? 'draft' : 'published',
+          files: data.data.files,
+          coverImage: data.data.coverImage
+        };
+        
+        await saveBook(bookForLocal);
+        
         // Success notification
         if (isDraft) {
           showSuccess(
@@ -214,27 +237,100 @@ const NewBookPage = () => {
         // Redirect after a short delay to show the notification
         setTimeout(() => {
           if (data.data && data.data._id) {
-            router.push(`/admin/books/${data.data._id}`);
+            router.push(`/books/${data.data._id}`);
           } else {
             router.push('/admin/books');
           }
         }, 2000);
         
       } else {
-        // Error from server
-        showError(
-          'فشل في حفظ الكتاب', 
-          data.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
-        );
-        setError(data.message || 'فشل في إضافة الكتاب');
+        // Try to save locally as fallback
+        try {
+          const bookForLocal = {
+            _id: `local_${Date.now()}`,
+            id: `local_${Date.now()}`,
+            title: formData.title,
+            author: formData.author,
+            description: formData.description,
+            genre: formData.genre,
+            language: formData.language,
+            publishYear: parseInt(formData.publishYear) || new Date().getFullYear(),
+            isbn: formData.isbn,
+            pages: parseInt(formData.pages) || 0,
+            publisher: formData.publisher,
+            tags: formData.tags,
+            status: 'published', // Make it visible locally
+            files: {},
+            coverImage: formData.coverImage ? URL.createObjectURL(formData.coverImage) : undefined
+          };
+          
+          const localResult = await saveBook(bookForLocal);
+          
+          if (localResult.success) {
+            showSuccess(
+              'تم حفظ الكتاب محلياً!', 
+              'لم يتم رفع الكتاب للخادم، لكن تم حفظه محلياً. سيظهر في قائمة الكتب.'
+            );
+            
+            setTimeout(() => {
+              router.push(`/books/${bookForLocal.id}`);
+            }, 2000);
+          } else {
+            throw new Error('فشل في الحفظ المحلي');
+          }
+        } catch (localError) {
+          // Error from server and local save failed
+          showError(
+            'فشل في حفظ الكتاب', 
+            data.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+          );
+          setError(data.message || 'فشل في إضافة الكتاب');
+        }
       }
     } catch (error) {
       console.error('Error creating book:', error);
-      showError(
-        'خطأ في الاتصال', 
-        'تعذر الاتصال بالخادم. يرجى التحقق من الاتصال والمحاولة مرة أخرى.'
-      );
-      setError('حدث خطأ أثناء إضافة الكتاب');
+      
+      // Try to save locally as fallback
+      try {
+        const bookForLocal = {
+          _id: `local_${Date.now()}`,
+          id: `local_${Date.now()}`,
+          title: formData.title,
+          author: formData.author,
+          description: formData.description,
+          genre: formData.genre,
+          language: formData.language,
+          publishYear: parseInt(formData.publishYear) || new Date().getFullYear(),
+          isbn: formData.isbn,
+          pages: parseInt(formData.pages) || 0,
+          publisher: formData.publisher,
+          tags: formData.tags,
+          status: 'published', // Make it visible locally
+          files: {},
+          coverImage: formData.coverImage ? URL.createObjectURL(formData.coverImage) : undefined
+        };
+        
+        const localResult = await saveBook(bookForLocal);
+        
+        if (localResult.success) {
+          showSuccess(
+            'تم حفظ الكتاب محلياً!', 
+            'لم يتم الاتصال بالخادم، لكن تم حفظ الكتاب محلياً. سيظهر في قائمة الكتب.'
+          );
+          
+          setTimeout(() => {
+            router.push(`/books/${bookForLocal.id}`);
+          }, 2000);
+        } else {
+          throw new Error('فشل في الحفظ المحلي');
+        }
+      } catch (localError) {
+        showError(
+          'خطأ في الاتصال', 
+          'تعذر الاتصال بالخادم وفشل في الحفظ المحلي. يرجى التحقق من الاتصال والمحاولة مرة أخرى.'
+        );
+        setError('حدث خطأ أثناء إضافة الكتاب');
+      }
     } finally {
       setLoading(false);
       setIsPublishing(false);
