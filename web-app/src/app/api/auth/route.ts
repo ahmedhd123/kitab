@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://kitab-production.up.railway.app';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || process.env.BACKEND_URL || 'https://kitab-production.up.railway.app';
 
 // JWT token generation (simplified for demo)
 function generateToken(user: any) {
