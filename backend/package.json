@@ -2,9 +2,9 @@
   "name": "kitabi-backend",
   "version": "1.0.0",
   "description": "Backend API for Kitabi - AI-powered book social platform",
-  "main": "src/server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node index.js",
     "dev": "nodemon src/server.js",
     "build": "echo 'Build completed successfully'",
     "railway:start": "node src/server.js",
