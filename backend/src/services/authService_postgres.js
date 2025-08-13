@@ -185,7 +185,17 @@ class AuthService {
         }
 
         // Check password
+        console.log('🔐 Debug - User found:', {
+          id: user.id,
+          email: user.email,
+          isActive: user.isActive,
+          passwordHash: user.password?.substring(0, 20) + '...'
+        });
+        console.log('🔐 Debug - Input password:', password);
+        
         const isPasswordValid = await encryptionUtils.comparePassword(password, user.password);
+        console.log('🔐 Debug - Password comparison result:', isPasswordValid);
+        
         if (!isPasswordValid) {
           console.log('❌ Invalid password for user:', email);
           throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
