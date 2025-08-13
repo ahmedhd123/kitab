@@ -3,27 +3,30 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { BookOpen, Search, TrendingUp, Users, Sparkles, ArrowRight, Star, Heart, MessageCircle, BookMarked, Users2, Award, Globe, UserPlus, LogIn } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import NavigationNextAuth from '@/components/NavigationNextAuth';
 import { useBooks } from '@/hooks/useBooks';
-import { isAuthenticated as checkAuthStatus } from '@/utils/auth';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const { data: session } = useSession();
+  const isAuthenticated = !!session;
   const router = useRouter();
+  
+  // Always call useBooks - hooks must be called in the same order
+  const { books: featuredBooks, loading, error } = useBooks({ limit: 6 });
   
   // Ensure client-side only
   useEffect(() => {
     setIsClient(true);
   }, []);
   
-  // Get non-Arabic books for featured section - only on client
-  const { books: featuredBooks, loading, error } = isClient ? useBooks({ limit: 6 }) : { books: [], loading: true, error: null };
-  const nonArabicBooks = featuredBooks.filter(book => !book.genres.includes('أدب عربي'));
+  // Filter non-Arabic books only when client is ready and books are loaded
+  const nonArabicBooks = isClient && featuredBooks ? featuredBooks.filter(book => !book.genres.includes('أدب عربي')) : [];
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -39,9 +42,6 @@ export default function Home() {
 
   // Floating animation effect
   useEffect(() => {
-    // Check authentication status
-    setIsAuthenticated(checkAuthStatus());
-
     const interval = setInterval(() => {
       const elements = document.querySelectorAll('.floating-element');
       elements.forEach((el) => {
@@ -85,7 +85,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-      <Navigation currentPage="home" />
+      <NavigationNextAuth currentPage="/" />
       
       {/* Floating Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -193,23 +193,23 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link 
-                href="/auth/register"
+                href="/test-simple-auth"
                 className="group relative px-8 py-4 bg-white text-purple-600 rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 min-w-[200px]"
               >
                 <span className="flex items-center justify-center gap-3">
                   <UserPlus className="w-6 h-6" />
-                  إنشاء حساب مجاني
+                  جرب النظام الآن
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </Link>
               
               <Link 
-                href="/auth/login"
+                href="/auth/simple-login"
                 className="px-8 py-4 border-2 border-white text-white rounded-2xl font-bold text-lg hover:bg-white hover:text-purple-600 transition-all duration-300 transform hover:scale-105 min-w-[200px]"
               >
                 <span className="flex items-center justify-center gap-3">
                   <LogIn className="w-6 h-6" />
-                  تسجيل دخول
+                  تسجيل دخول سريع
                 </span>
               </Link>
             </div>
