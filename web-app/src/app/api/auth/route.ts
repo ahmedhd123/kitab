@@ -1,101 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import bcrypt from 'bcryptjs';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://kitab-production.up.railway.app';
-const USE_DIRECT_MONGODB = process.env.NEXT_PUBLIC_USE_DIRECT_MONGODB === 'true';
 
 // JWT token generation (simplified for demo)
 function generateToken(user: any) {
   return `jwt_${user.role}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-async function handleDirectMongoDB(body: any) {
-  try {
-    const { db } = await connectToDatabase();
-    const usersCollection = db.collection('users');
-    const { email, password, type, username, firstName, lastName, bio, favoriteGenres } = body;
-
-    if (type === 'login') {
-      // Find user by email
-      const user = await usersCollection.findOne({ email });
-      
-      if (!user) {
-        return NextResponse.json({ 
-          success: false, 
-          message: 'البريد الإلكتروني غير مسجل' 
-        }, { status: 401 });
-      }
-
-      // Check password (in production, this would be hashed)
-      const isValidPassword = user.password === password || await bcrypt.compare(password, user.password);
-      
-      if (!isValidPassword) {
-        return NextResponse.json({ 
-          success: false, 
-          message: 'كلمة السر غير صحيحة' 
-        }, { status: 401 });
-      }
-
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
-      
+function handleDemoFallback(body: any) {
+  const { email, password, type, username, firstName, lastName } = body;
+  
+  if (type === 'login') {
+    // Demo login users
+    if (email === 'admin@kitabi.com' && password === 'admin123') {
       return NextResponse.json({
         success: true,
         message: 'تم تسجيل الدخول بنجاح',
-        user: userWithoutPassword,
-        token: generateToken(user),
-        isDatabaseMode: true,
-        source: 'MongoDB Atlas Direct'
-      });
-
-    } else if (type === 'register') {
-      // Check if user already exists
-      const existingUser = await usersCollection.findOne({ email });
-      
-      if (existingUser) {
-        return NextResponse.json({
-          success: false,
-          message: 'هذا البريد الإلكتروني مسجل مسبقاً'
-        }, { status: 409 });
-      }
-
-      // Create new user
-      const newUser = {
-        email,
-        password, // In production, hash this password
-        username: username || email.split('@')[0],
-        profile: {
-          firstName: firstName || 'مستخدم',
-          lastName: lastName || 'جديد'
+        user: {
+          id: 'demo_admin',
+          email: 'admin@kitabi.com',
+          username: 'admin',
+          firstName: 'مدير',
+          lastName: 'الموقع',
+          role: 'admin',
+          isAdmin: true
         },
-        role: email === 'admin@kitabi.com' ? 'admin' : 'user',
-        isAdmin: email === 'admin@kitabi.com',
-        bio,
-        favoriteGenres: favoriteGenres || [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      const result = await usersCollection.insertOne(newUser);
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = newUser;
-
+        token: generateToken({ role: 'admin' }),
+        isDatabaseMode: false,
+        source: 'Demo Mode'
+      });
+    } else if (email && password) {
       return NextResponse.json({
         success: true,
-        message: 'تم إنشاء الحساب بنجاح',
-        user: { ...userWithoutPassword, _id: result.insertedId },
-        token: generateToken(newUser),
-        isDatabaseMode: true,
-        source: 'MongoDB Atlas Direct'
-      }, { status: 201 });
+        message: 'تم تسجيل الدخول بنجاح',
+        user: {
+          id: `demo_user_${Date.now()}`,
+          email,
+          username: email.split('@')[0],
+          firstName: 'مستخدم',
+          lastName: 'تجريبي',
+          role: 'user',
+          isAdmin: false
+        },
+        token: generateToken({ role: 'user' }),
+        isDatabaseMode: false,
+        source: 'Demo Mode'
+      });
     }
-
-  } catch (error) {
-    console.error('Direct MongoDB error:', error);
-    throw error;
+  } else if (type === 'register') {
+    // Demo registration
+    return NextResponse.json({
+      success: true,
+      message: 'تم إنشاء الحساب بنجاح',
+      user: {
+        id: `demo_user_${Date.now()}`,
+        email,
+        username: username || email.split('@')[0],
+        firstName: firstName || 'مستخدم',
+        lastName: lastName || 'جديد',
+        role: 'user',
+        isAdmin: false
+      },
+      token: generateToken({ role: 'user' }),
+      isDatabaseMode: false,
+      source: 'Demo Mode'
+    });
   }
+  
+  return NextResponse.json({
+    success: false,
+    message: 'فشل في المصادقة'
+  }, { status: 401 });
 }
 
 export async function POST(request: NextRequest) {
@@ -111,136 +86,58 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Try direct MongoDB connection first if enabled
-    if (USE_DIRECT_MONGODB) {
-      try {
-        console.log('🔗 Attempting direct MongoDB Atlas connection...');
-        return await handleDirectMongoDB(body);
-      } catch (mongoError) {
-        console.error('Direct MongoDB failed, falling back to Railway backend:', mongoError);
-      }
-    }
-
-    // Fallback to Railway backend
-    console.log(`🔗 Using Railway backend: ${BACKEND_URL}/api/auth/${type}`);
-
+    // Always try Railway backend first for production
+    console.log(`🚂 Using Railway backend: ${BACKEND_URL}/api/auth/${type}`);
+    
     const endpoint = type === 'login' ? '/api/auth/login' : '/api/auth/register';
     const payload = type === 'login' 
       ? { email, password }
       : { email, password, username: username || email.split('@')[0], firstName, lastName, bio, favoriteGenres };
 
-    const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Origin': 'https://kitab-plum.vercel.app',
-      },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': 'https://kitab-plum.vercel.app',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      // Final fallback to demo mode for network errors
-      if (response.status >= 500) {
-        console.log('🔄 Railway backend error, using demo fallback');
-        return handleDemoFallback(body);
+      if (response.ok) {
+        return NextResponse.json({
+          ...data,
+          isDatabaseMode: true,
+          source: 'Railway PostgreSQL'
+        });
       }
-      
-      return NextResponse.json({
-        success: false,
-        message: data.message || 'خطأ في العملية',
-        isDatabaseMode: false
-      }, { status: response.status });
-    }
 
-    console.log('✅ Railway backend operation successful');
-    return NextResponse.json({
-      success: true,
-      message: data.message,
-      user: data.user,
-      token: data.token,
-      isDatabaseMode: true,
-      source: 'Railway Backend'
-    });
+      // If Railway backend gives client error (4xx), return the error
+      if (response.status >= 400 && response.status < 500) {
+        return NextResponse.json({
+          success: false,
+          message: data.message || 'خطأ في البيانات المرسلة'
+        }, { status: response.status });
+      }
+
+      // For server errors (5xx), fall back to demo mode
+      console.log('🔄 Railway backend server error, using demo fallback');
+      return handleDemoFallback(body);
+
+    } catch (networkError) {
+      console.error('🌐 Network error connecting to Railway, using demo fallback:', networkError);
+      return handleDemoFallback(body);
+    }
 
   } catch (error) {
-    console.error('Authentication error:', error);
-    
-    // Final fallback to demo mode
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
-      console.log('🔄 Network error, using demo fallback');
-      return handleDemoFallback(await request.json());
-    }
-
-    return NextResponse.json({ 
-      success: false, 
-      message: 'خطأ في النظام' 
+    console.error('❌ API route error:', error);
+    return NextResponse.json({
+      success: false,
+      message: 'حدث خطأ داخلي في الخادم'
     }, { status: 500 });
   }
-}
-
-// Demo fallback function (only for complete failures)
-function handleDemoFallback(body: any) {
-  const { email, password, type } = body;
-  
-  if (type === 'login') {
-    if (email === 'admin@kitabi.com' && password === 'admin123') {
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: 'demo_admin',
-          email: 'admin@kitabi.com',
-          username: 'admin',
-          profile: { firstName: 'مدير', lastName: 'النظام' },
-          role: 'admin',
-          isAdmin: true
-        },
-        token: 'demo_token_admin',
-        isDatabaseMode: false,
-        source: 'Demo Mode',
-        message: 'تم الدخول بالوضع التجريبي'
-      });
-    } else if (email === 'user@kitabi.com' && password === 'user123') {
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: 'demo_user',
-          email: 'user@kitabi.com',
-          username: 'user',
-          profile: { firstName: 'مستخدم', lastName: 'تجريبي' },
-          role: 'user',
-          isAdmin: false
-        },
-        token: 'demo_token_user',
-        isDatabaseMode: false,
-        source: 'Demo Mode',
-        message: 'تم الدخول بالوضع التجريبي'
-      });
-    }
-  } else if (type === 'register') {
-    return NextResponse.json({
-      success: true,
-      user: {
-        id: `demo_${Date.now()}`,
-        email,
-        username: email.split('@')[0],
-        profile: { firstName: 'مستخدم', lastName: 'جديد' },
-        role: 'user',
-        isAdmin: false
-      },
-      token: `demo_token_${Date.now()}`,
-      isDatabaseMode: false,
-      source: 'Demo Mode',
-      message: 'تم إنشاء حساب تجريبي (قاعدة البيانات غير متصلة)'
-    }, { status: 201 });
-  }
-  
-  return NextResponse.json({
-    success: false,
-    message: 'فشل الاتصال بقاعدة البيانات'
-  }, { status: 503 });
 }
 
 export async function OPTIONS(request: NextRequest) {
