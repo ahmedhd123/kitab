@@ -1,0 +1,16 @@
+{
+  "name": "kitabi-railway",
+  "version": "1.0.0",
+  "description": "Kitabi backend for Railway deployment",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "cd backend && node src/server.js",
+    "build": "cd backend && npm install --production",
+    "postinstall": "cd backend && npm install --production"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
