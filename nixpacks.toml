@@ -1,0 +1,11 @@
+[phases.setup]
+cmds = ["cd backend"]
+
+[phases.install]
+cmds = ["cd backend && rm -f package-lock.json && npm install --production"]
+
+[phases.build]
+cmds = ["echo 'Build phase completed'"]
+
+[start]
+cmd = "cd backend && node src/server.js"
