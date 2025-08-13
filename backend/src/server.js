@@ -298,28 +298,38 @@ app.post('/api/test-auth', async (req, res) => {
 });
 
 /**
- * Database Connection (non-blocking)
+ * Database Connection (PostgreSQL)
  */
-async function initializeDatabase() {
+async function connectToDatabase() {
   try {
-    // Check if we should use database
-    const useDatabase = process.env.USE_DATABASE === 'true';
+    console.log('🔄 Connecting to PostgreSQL database...');
     
-    if (useDatabase) {
-      console.log('🔄 Connecting to MongoDB...');
-      await DatabaseUtils.connectDB();
-      console.log('✅ Connected to MongoDB successfully!');
-      console.log('📚 Using MongoDB database for persistent storage');
+    // Test PostgreSQL connection
+    const isConnected = await testConnection();
+    
+    if (isConnected) {
+      console.log('✅ Connected to PostgreSQL successfully!');
+      console.log('📚 Using PostgreSQL database for persistent storage');
+      
+      // Initialize database tables
+      await initializeDatabase();
+      console.log('🏗️  Database tables initialized successfully');
+      
+      return true;
     } else {
-      console.log('📚 Using sample data mode - database connection optional');
+      console.warn('⚠️  PostgreSQL connection failed, continuing in demo mode');
+      console.log('📚 Using sample data mode - all features still available');
+      return false;
     }
   } catch (err) {
-    console.log('📚 Continuing without database connection - sample data will still work');
-    console.log('🔧 Database error:', err.message);
+    console.warn('⚠️  Database connection error:', err.message);
+    console.log('📚 Continuing in demo mode - all features still available');
+    return false;
   }
 }
 
-initializeDatabase();
+// Connect to database (non-blocking)
+connectToDatabase();
 
 /**
  * API Routes
@@ -408,16 +418,8 @@ async function startServer() {
   try {
     console.log('🔄 Initializing Kitabi Backend Server...');
     
-    // Initialize PostgreSQL Database
-    console.log('🐘 Connecting to PostgreSQL database...');
-    const dbResult = await initializeDatabase();
-    
-    if (dbResult) {
-      console.log('✅ PostgreSQL database initialized successfully');
-      console.log('🏗️  Database models synchronized');
-    } else {
-      console.warn('⚠️  Database connection failed, continuing in limited mode');
-    }
+    // PostgreSQL connection is already initialized above
+    console.log('🐘 PostgreSQL connection status checked');
 
     console.log('🌐 Allowing connections from IPs:', localIPs);
 

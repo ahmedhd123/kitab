@@ -27,12 +27,8 @@ const User = sequelize.define('User', {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false,
-    set(value) {
-      // Hash password before saving
-      const hashedPassword = bcrypt.hashSync(value, 12);
-      this.setDataValue('password', hashedPassword);
-    }
+    allowNull: false
+    // Removed automatic hashing - will be handled in service layer
   },
   username: {
     type: DataTypes.STRING,
