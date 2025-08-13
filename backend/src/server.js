@@ -213,27 +213,86 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
  * Health Check Routes
  */
 app.get('/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState;
+  const dbStatusText = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  }[dbStatus] || 'unknown';
+
   res.status(200).json({
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
+    database: {
+      status: dbStatusText,
+      connected: dbStatus === 1
+    },
+    cors: {
+      allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',').length || 0,
+      clientUrl: process.env.CLIENT_URL || 'not-set'
+    }
   });
 });
 
 app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState;
+  const dbConnected = dbStatus === 1;
+
   res.status(200).json({
     success: true,
     message: 'API is healthy',
     services: {
-      database: 'connected', // This would be dynamic based on actual DB status
+      database: dbConnected ? 'connected' : 'disconnected',
       server: 'running',
       memory: process.memoryUsage(),
-      uptime: process.uptime()
+      uptime: process.uptime(),
+      authentication: 'available',
+      cors: 'configured'
+    },
+    config: {
+      useDatabase: process.env.USE_DATABASE === 'true',
+      nodeEnv: process.env.NODE_ENV,
+      allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || [],
+      clientUrl: process.env.CLIENT_URL
     },
     timestamp: new Date().toISOString()
   });
+});
+
+// Test route for authentication debugging
+app.post('/api/test-auth', async (req, res) => {
+  try {
+    const authService = require('./services/authService');
+    const { email, password } = req.body;
+    
+    console.log('🧪 Test auth request:', { email, origin: req.get('Origin') });
+    
+    const result = await authService.login({ email, password });
+    
+    res.json({
+      success: true,
+      message: 'Test authentication successful',
+      result: {
+        authenticated: result.success,
+        isDatabaseMode: result.isDatabaseMode,
+        userRole: result.user?.role,
+        hasToken: !!result.token
+      }
+    });
+  } catch (error) {
+    console.error('🧪 Test auth error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Test authentication failed',
+      error: error.message
+    });
+  }
 });
 
 /**

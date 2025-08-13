@@ -175,32 +175,23 @@ class AuthService {
         }).select('+password');
 
         if (!user) {
-          console.log('❌ User not found in database:', email);
           throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         }
 
         // Check password
         const isPasswordValid = await encryptionUtils.comparePassword(password, user.password);
         if (!isPasswordValid) {
-          console.log('❌ Invalid password for user:', email);
           throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         }
 
         // Check user status
         if (user.status !== 'active') {
-          console.log('❌ Inactive user attempted login:', email);
           throw new Error('الحساب غير نشط. يرجى التواصل مع الدعم الفني.');
         }
 
         // Update last login
-        try {
-          user.lastLogin = new Date();
-          await user.save();
-        } catch (updateError) {
-          console.warn('⚠️ Could not update last login:', updateError.message);
-          // Continue with login even if last login update fails
-        }
-        
+        user.lastLogin = new Date();
+        await user.save();
         console.log('✅ User authenticated successfully via MongoDB Atlas:', user.email);
 
         // Generate token

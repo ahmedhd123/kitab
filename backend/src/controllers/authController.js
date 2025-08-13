@@ -43,27 +43,55 @@ class AuthController {
    */
   async login(req, res) {
     try {
-      console.log('🔐 Login attempt:', { email: req.body.email });
+      console.log('🔐 Login attempt:', { 
+        email: req.body.email, 
+        timestamp: new Date().toISOString(),
+        userAgent: req.get('User-Agent'),
+        origin: req.get('Origin')
+      });
 
       const result = await authService.login(req.body);
 
+      console.log('✅ Login successful for:', req.body.email);
       res.json(result);
     } catch (error) {
-      console.error('❌ Login error:', error.message);
+      console.error('❌ Login error details:', {
+        message: error.message,
+        stack: error.stack,
+        email: req.body.email,
+        timestamp: new Date().toISOString()
+      });
       
-      // Handle specific errors
-      if (error.message.includes('Invalid email or password') || 
-          error.message.includes('not active')) {
+      // Handle specific Arabic error messages
+      if (error.message.includes('البريد الإلكتروني أو كلمة المرور غير صحيحة')) {
         return res.status(401).json({
           success: false,
-          message: error.message
+          message: 'بيانات تسجيل الدخول غير صحيحة'
         });
       }
 
+      if (error.message.includes('الحساب غير نشط')) {
+        return res.status(403).json({
+          success: false,
+          message: 'الحساب غير نشط. يرجى التواصل مع الدعم الفني.'
+        });
+      }
+
+      if (error.message.includes('فشل في تسجيل الدخول')) {
+        return res.status(400).json({
+          success: false,
+          message: 'حدث خطأ في تسجيل الدخول. يرجى التحقق من البيانات والمحاولة مرة أخرى.'
+        });
+      }
+
+      // General error with more specific message
       res.status(500).json({
         success: false,
-        message: 'Login failed',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        message: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+        debug: process.env.NODE_ENV === 'development' ? {
+          error: error.message,
+          timestamp: new Date().toISOString()
+        } : undefined
       });
     }
   }

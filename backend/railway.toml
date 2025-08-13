@@ -4,9 +4,10 @@
 
 [deploy]
   startCommand = "npm start"
-  restartPolicyType = "always"
+  restartPolicyType = "ON_FAILURE"
   healthcheckPath = "/health"
-  healthcheckTimeout = 100
+  healthcheckTimeout = 300
+  sleepApplication = false
 
 [env]
   NODE_ENV = "production"

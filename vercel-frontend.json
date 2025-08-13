@@ -5,14 +5,62 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "framework": "nextjs",
+  "public": true,
   "env": {
     "NEXT_PUBLIC_API_URL": "https://kitabi-backend.vercel.app/api",
     "NEXT_PUBLIC_APP_NAME": "Kitabi",
-    "NEXT_PUBLIC_APP_VERSION": "1.0.0"
+    "NEXT_PUBLIC_APP_VERSION": "1.0.0",
+    "NEXT_PUBLIC_APP_DESCRIPTION": "AI-Powered Arabic Book Social Platform",
+    "NEXT_PUBLIC_BACKEND_URL": "https://kitabi-backend.vercel.app",
+    "NEXT_PUBLIC_FRONTEND_URL": "https://kitab-plum.vercel.app",
+    "NEXT_PUBLIC_ENABLE_ANALYTICS": "true",
+    "NEXT_PUBLIC_ENABLE_PWA": "false",
+    "NEXT_PUBLIC_ENABLE_NOTIFICATIONS": "true",
+    "NEXT_PUBLIC_DEFAULT_LANGUAGE": "ar",
+    "NEXT_PUBLIC_SUPPORTED_LANGUAGES": "ar,en"
   },
   "build": {
     "env": {
-      "NEXT_TELEMETRY_DISABLED": "1"
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "NODE_ENV": "production"
     }
-  }
+  },
+  "functions": {
+    "pages/api/**/*.js": {
+      "maxDuration": 30
+    },
+    "pages/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://kitabi-backend.vercel.app/api/:path*"
+    }
+  ],
+  "regions": ["iad1"]
 }

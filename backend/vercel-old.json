@@ -1,0 +1,58 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/server.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/src/server.js",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/health",
+      "dest": "/src/server.js",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/src/server.js"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/src/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/src/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PORT": "5000",
+    "USE_DATABASE": "true",
+    "MONGODB_URI": "mongodb+srv://ahmedhd123:Ahmedhd123@kitabi1.8zozmw.mongodb.net/kitabi?retryWrites=true&w=majority",
+    "JWT_SECRET": "kitabi-super-secret-production-jwt-key-2025-change-this-to-random-string",
+    "JWT_EXPIRE": "7d",
+    "BCRYPT_ROUNDS": "12",
+    "SESSION_SECRET": "kitabi-session-secret-production-2025",
+    "CLIENT_URL": "https://kitab-8vj807i0v-ahmedhd123s-projects.vercel.app",
+    "ALLOWED_ORIGINS": "https://kitab-8vj807i0v-ahmedhd123s-projects.vercel.app,https://kitab-jzp7cln2g-ahmedhd123s-projects.vercel.app,https://kitab-d5zgxx3wo-ahmedhd123s-projects.vercel.app,https://kitab-plum.vercel.app,https://kitabi-backend.vercel.app,https://kitab-123fpnqxz-ahmedhd123s-projects.vercel.app",
+    "VERCEL_FRONTEND_URL": "https://kitab-8vj807i0v-ahmedhd123s-projects.vercel.app",
+    "VERCEL_BACKEND_URL": "https://kitabi-backend.vercel.app",
+    "VERCEL_ENV": "production",
+    "SUPPORT_EMAIL": "ahmedhd123@gmail.com",
+    "EMAIL_USER": "ahmedhd123@gmail.com",
+    "EMAIL_PASS": "your-email-password",
+    "GOOGLE_CLIENT_ID": "your-google-client-id",
+    "GOOGLE_CLIENT_SECRET": "your-google-client-secret",
+    "REDIS_URL": "",
+    "ANALYTICS_ID": ""
+  }
+}
