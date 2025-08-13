@@ -77,8 +77,7 @@ export async function POST(request: NextRequest) {
     console.error('MongoDB Atlas connection failed:', error);
     
     // Only use demo mode if network completely fails
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
+    if (error.message?.includes('fetch') || error.message?.includes('network')) {
       console.log('🔄 Network error, using demo fallback');
       return handleDemoFallback(await request.json());
     }
@@ -91,7 +90,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Demo fallback function (only for network failures)
-function handleDemoFallback(body: any) {
+function handleDemoFallback(body) {
   const { email, password, type } = body;
   
   if (type === 'login') {

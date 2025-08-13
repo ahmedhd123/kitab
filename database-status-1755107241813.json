@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-08-13T17:47:21.813Z",
+  "results": {
+    "frontend": {
+      "status": "ONLINE",
+      "databaseMode": "DEMO",
+      "hasBackend": false,
+      "apiEndpoints": true
+    },
+    "backend": {
+      "status": "ONLINE",
+      "databaseConnected": false,
+      "mongodbStatus": "unknown"
+    },
+    "database": {
+      "source": "backend",
+      "connected": true,
+      "statusCode": 201,
+      "message": "تم إنشاء حساب تجريبي (قاعدة البيانات غير متصلة)"
+    },
+    "recommendations": [
+      {
+        "priority": "MEDIUM",
+        "issue": "Frontend-Only Deployment",
+        "solution": "Integrate backend API calls or deploy full-stack",
+        "impact": "Limited functionality, demo data only"
+      },
+      {
+        "priority": "HIGH",
+        "issue": "Backend online but database disconnected",
+        "solution": "Check MongoDB Atlas connection string and network access",
+        "impact": "API available but no data persistence"
+      }
+    ]
+  }
+}
