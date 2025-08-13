@@ -21,7 +21,7 @@ const { globalErrorHandler, notFoundHandler } = require('./middleware/errorHandl
 const { sanitize } = require('./middleware/validate');
 
 // Import routes
-const authRoutes = require('./routes/auth_postgres'); // PostgreSQL version
+const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const bookRoutes = require('./routes/books');
 const reviewRoutes = require('./routes/reviews');

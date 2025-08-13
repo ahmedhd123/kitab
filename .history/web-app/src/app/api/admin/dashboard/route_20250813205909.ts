@@ -36,14 +36,7 @@ async function getDirectMongoDBStats() {
     ]);
 
     // Get recent activity
-    const recentActivity: Array<{
-      id: string;
-      type: string;
-      title: string;
-      user: string;
-      timestamp: Date;
-      icon: string;
-    }> = [];
+    const recentActivity = [];
     
     const recentBooks = await db.collection('books')
       .find({})

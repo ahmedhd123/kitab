@@ -21,7 +21,7 @@ const { globalErrorHandler, notFoundHandler } = require('./middleware/errorHandl
 const { sanitize } = require('./middleware/validate');
 
 // Import routes
-const authRoutes = require('./routes/auth_postgres'); // PostgreSQL version
+const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const bookRoutes = require('./routes/books');
 const reviewRoutes = require('./routes/reviews');
@@ -406,19 +406,6 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 async function startServer() {
   try {
-    console.log('🔄 Initializing Kitabi Backend Server...');
-    
-    // Initialize PostgreSQL Database
-    console.log('🐘 Connecting to PostgreSQL database...');
-    const dbResult = await initializeDatabase();
-    
-    if (dbResult) {
-      console.log('✅ PostgreSQL database initialized successfully');
-      console.log('🏗️  Database models synchronized');
-    } else {
-      console.warn('⚠️  Database connection failed, continuing in limited mode');
-    }
-
     console.log('🌐 Allowing connections from IPs:', localIPs);
 
     // Start server on all network interfaces
@@ -428,7 +415,6 @@ async function startServer() {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🌐 Environment: ${NODE_ENV}
 🔧 Port: ${PORT}
-🐘 Database: PostgreSQL (Railway)
 🌍 Server accessible from:
 ${localIPs.map(ip => `   - http://${ip}:${PORT}`).join('\n')}
 
@@ -455,7 +441,7 @@ ${localIPs.map(ip => `   - http://${ip}:${PORT}`).join('\n')}
    ✅ CORS Security
    ✅ Request Sanitization
    ✅ File Upload Support
-   ✅ PostgreSQL Database
+   ✅ Database Integration
    ✅ Sample Data Fallback
 
 🛡️ Security:

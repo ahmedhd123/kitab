@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-08-13T17:54:20.032Z",
+  "integrationPercentage": 0,
+  "results": {
+    "authentication": {
+      "status": "FAILED",
+      "databaseMode": false,
+      "statusCode": 200,
+      "message": "تم إنشاء حساب تجريبي (قاعدة البيانات غير متصلة)",
+      "usedMongoDB": false
+    },
+    "books": {
+      "status": "SUCCESS",
+      "statusCode": 200,
+      "booksCount": 0,
+      "usedMongoDB": false,
+      "source": "Unknown"
+    },
+    "admin": {
+      "status": "FAILED",
+      "statusCode": 404,
+      "usedMongoDB": false,
+      "source": "Unknown",
+      "tokenValid": true
+    },
+    "database": {
+      "status": "SUCCESS",
+      "statusCode": 200,
+      "mongodbStatus": "unknown",
+      "environment": "unknown"
+    },
+    "integration": null
+  },
+  "urls": {
+    "frontend": "https://kitab-plum.vercel.app",
+    "backend": "https://kitab-production.up.railway.app"
+  }
+}
