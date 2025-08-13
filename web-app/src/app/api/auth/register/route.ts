@@ -8,18 +8,28 @@ export async function POST(request: NextRequest) {
     console.log('Registration request received:', { ...body, password: '[REDACTED]' });
 
     // Forward the request to Railway backend
-    const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+    const backendUrl = `${BACKEND_URL}/api/auth/register`;
+    console.log('Forwarding to backend URL:', backendUrl);
+    
+    const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Origin': 'https://kitab-bhh92s0gi-ahmedhd123s-projects.vercel.app',
       },
       body: JSON.stringify(body),
     });
 
+    console.log('Backend response status:', response.status);
     const data = await response.json();
     console.log('Backend response:', { ...data, token: data.token ? '[REDACTED]' : undefined });
 
     if (!response.ok) {
+      console.error('Backend error:', {
+        status: response.status,
+        statusText: response.statusText,
+        data
+      });
       return NextResponse.json(
         { 
           success: false, 
@@ -38,6 +48,11 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Registration API error:', error);
+    console.error('Error details:', {
+      name: (error as any)?.name,
+      message: (error as any)?.message,
+      cause: (error as any)?.cause
+    });
     return NextResponse.json(
       { 
         success: false, 

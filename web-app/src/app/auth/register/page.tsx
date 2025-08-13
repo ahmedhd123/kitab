@@ -70,7 +70,12 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError('حدث خطأ في الاتصال. تأكد من تشغيل الخادم.');
+      console.error('Error details:', {
+        name: (error as any)?.name,
+        message: (error as any)?.message,
+        stack: (error as any)?.stack
+      });
+      setError('حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مرة أخرى.');
     } finally {
       setLoading(false);
     }
