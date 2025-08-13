@@ -42,21 +42,52 @@ export default function RegisterPage() {
         .substring(0, 20) // Limit length
         || 'user' + Date.now().toString().slice(-6); // Fallback if name is empty or all special chars
 
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: cleanUsername,
-          email: formData.email,
-          password: formData.password,
-          firstName: formData.name.split(' ')[0] || '',
-          lastName: formData.name.split(' ').slice(1).join(' ') || ''
-        }),
-      });
-
-      const data = await response.json();
+      // Try direct Railway connection first as fallback for Vercel auth issues
+      let response;
+      let data;
+      
+      try {
+        // Primary: Use frontend API route
+        response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: cleanUsername,
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.name.split(' ')[0] || '',
+            lastName: formData.name.split(' ').slice(1).join(' ') || ''
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Frontend API failed');
+        }
+        
+        data = await response.json();
+      } catch (frontendError) {
+        console.log('Frontend API failed, trying Railway directly:', frontendError);
+        
+        // Fallback: Direct Railway connection
+        response = await fetch('https://kitab-production.up.railway.app/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit',
+          body: JSON.stringify({
+            username: cleanUsername,
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.name.split(' ')[0] || '',
+            lastName: formData.name.split(' ').slice(1).join(' ') || ''
+          }),
+        });
+        
+        data = await response.json();
+      }
 
       if (response.ok) {
         // Store the token in localStorage

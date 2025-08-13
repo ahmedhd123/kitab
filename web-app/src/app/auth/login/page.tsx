@@ -43,18 +43,46 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
-      });
-
-      const data = await response.json();
+      // Try direct Railway connection first as fallback for Vercel auth issues
+      let response;
+      let data;
+      
+      try {
+        // Primary: Use frontend API route
+        response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Frontend API failed');
+        }
+        
+        data = await response.json();
+      } catch (frontendError) {
+        console.log('Frontend API failed, trying Railway directly:', frontendError);
+        
+        // Fallback: Direct Railway connection
+        response = await fetch('https://kitab-production.up.railway.app/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit',
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          }),
+        });
+        
+        data = await response.json();
+      }
 
       if (response.ok && data.success) {
         // Store the token in localStorage
