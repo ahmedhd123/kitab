@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Book } from './useBooks';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://kitab-production.up.railway.app';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://kitab-production.up.railway.app' 
+  : process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 export function useBook(id: string) {
   const [book, setBook] = useState<Book | null>(null);

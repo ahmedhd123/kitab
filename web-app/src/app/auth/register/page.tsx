@@ -42,52 +42,27 @@ export default function RegisterPage() {
         .substring(0, 20) // Limit length
         || 'user' + Date.now().toString().slice(-6); // Fallback if name is empty or all special chars
 
-      // Try direct Railway connection first as fallback for Vercel auth issues
-      let response;
-      let data;
+      // Direct Railway connection for production reliability
+      const RAILWAY_API = 'https://kitab-production.up.railway.app/api/auth/register';
       
-      try {
-        // Primary: Use frontend API route
-        response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: cleanUsername,
-            email: formData.email,
-            password: formData.password,
-            firstName: formData.name.split(' ')[0] || '',
-            lastName: formData.name.split(' ').slice(1).join(' ') || ''
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Frontend API failed');
-        }
-        
-        data = await response.json();
-      } catch (frontendError) {
-        console.log('Frontend API failed, trying Railway directly:', frontendError);
-        
-        // Fallback: Direct Railway connection
-        response = await fetch('https://kitab-production.up.railway.app/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'omit',
-          body: JSON.stringify({
-            username: cleanUsername,
-            email: formData.email,
-            password: formData.password,
-            firstName: formData.name.split(' ')[0] || '',
-            lastName: formData.name.split(' ').slice(1).join(' ') || ''
-          }),
-        });
-        
-        data = await response.json();
-      }
+      const response = await fetch(RAILWAY_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': 'https://kitab-bhh92s0gi-ahmedhd123s-projects.vercel.app',
+        },
+        mode: 'cors',
+        credentials: 'omit',
+        body: JSON.stringify({
+          username: cleanUsername,
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.name.split(' ')[0] || '',
+          lastName: formData.name.split(' ').slice(1).join(' ') || ''
+        }),
+      });
+
+      const data = await response.json();
 
       if (response.ok) {
         // Store the token in localStorage
