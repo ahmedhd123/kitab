@@ -1,0 +1,69 @@
+{
+  "tests": [
+    {
+      "name": "Health Endpoint",
+      "status": "PASS",
+      "timestamp": "2025-08-13T17:39:49.829Z",
+      "message": "API health check successful",
+      "responseTime": 1392,
+      "version": "1.0.0",
+      "environment": "production"
+    },
+    {
+      "name": "Books API",
+      "status": "PASS",
+      "timestamp": "2025-08-13T17:40:00.525Z",
+      "message": "Books API working, 0 books found",
+      "responseTime": 10692,
+      "bookCount": 0,
+      "pagination": {
+        "currentPage": 1,
+        "totalPages": 0,
+        "totalItems": 0,
+        "itemsPerPage": 10,
+        "hasNextPage": false,
+        "hasPrevPage": false
+      }
+    },
+    {
+      "name": "Auth API Health",
+      "status": "WARN",
+      "timestamp": "2025-08-13T17:40:00.616Z",
+      "message": "Auth health check returned 404",
+      "responseTime": 89
+    },
+    {
+      "name": "Database Connection",
+      "status": "FAIL",
+      "timestamp": "2025-08-13T17:40:00.701Z",
+      "message": "Database test failed: 405",
+      "responseTime": 84
+    },
+    {
+      "name": "CORS Configuration",
+      "status": "PASS",
+      "timestamp": "2025-08-13T17:40:11.129Z",
+      "message": "CORS headers present and configured",
+      "responseTime": 10426,
+      "allowOrigin": "*"
+    },
+    {
+      "name": "Admin API Security",
+      "status": "WARN",
+      "timestamp": "2025-08-13T17:40:11.196Z",
+      "message": "Unexpected admin response: 404",
+      "responseTime": 66
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "passed": 3,
+    "failed": 1,
+    "warnings": 2
+  },
+  "metadata": {
+    "testUrl": "https://kitab-plum.vercel.app",
+    "timestamp": "2025-08-13T17:40:11.240Z",
+    "tester": "Production Integration Tester v1.0.0"
+  }
+}
