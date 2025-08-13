@@ -4,7 +4,10 @@
   "description": "AI-powered book social platform - Full System",
   "private": true,
   "scripts": {
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start": "cd backend && npm start",
+    "railway:build": "cd backend && npm install",
+    "railway:start": "cd backend && node src/server.js",
+    "start:full": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd web-app && npm run dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
