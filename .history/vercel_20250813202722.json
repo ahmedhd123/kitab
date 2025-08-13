@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "web-app/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web-app/$1"
+    }
+  ],
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/health.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/books.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/test.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
