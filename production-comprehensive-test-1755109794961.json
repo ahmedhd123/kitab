@@ -1,0 +1,164 @@
+{
+  "timestamp": "2025-08-13T18:29:51.036Z",
+  "summary": {
+    "total": 9,
+    "passed": 8,
+    "failed": 0,
+    "warnings": 1
+  },
+  "components": {
+    "frontend": {
+      "status": "healthy",
+      "tests": [
+        {
+          "name": "Accessibility",
+          "status": "PASS",
+          "message": "Vercel deployment accessible",
+          "details": {
+            "responseTime": "548ms",
+            "hasContent": true
+          },
+          "timestamp": "2025-08-13T18:29:51.630Z"
+        },
+        {
+          "name": "API Routes",
+          "status": "PASS",
+          "message": "Frontend API routes responding",
+          "details": {
+            "statusCode": 401,
+            "responseTime": "528ms",
+            "hasApiStructure": true
+          },
+          "timestamp": "2025-08-13T18:29:52.161Z"
+        }
+      ]
+    },
+    "backend": {
+      "status": "healthy",
+      "tests": [
+        {
+          "name": "Health Check",
+          "status": "PASS",
+          "message": "Railway backend healthy",
+          "details": {
+            "responseTime": "667ms",
+            "response": {
+              "success": true,
+              "message": "Server is running",
+              "timestamp": "2025-08-13T18:29:52.696Z",
+              "environment": "production",
+              "version": "1.0.0",
+              "database": {
+                "status": "disconnected",
+                "connected": false
+              },
+              "cors": {
+                "allowedOrigins": 2,
+                "clientUrl": "https://kitab-bhh92s0gi-ahmedhd123s-projects.vercel.app"
+              }
+            }
+          },
+          "timestamp": "2025-08-13T18:29:52.829Z"
+        },
+        {
+          "name": "API Documentation",
+          "status": "PASS",
+          "message": "Backend API responding",
+          "details": {
+            "version": "1.0.0",
+            "endpoints": 7,
+            "features": 12
+          },
+          "timestamp": "2025-08-13T18:29:52.952Z"
+        },
+        {
+          "name": "Authentication",
+          "status": "PASS",
+          "message": "Auth endpoint responding",
+          "details": {
+            "statusCode": 200,
+            "hasAuthStructure": true
+          },
+          "timestamp": "2025-08-13T18:29:53.070Z"
+        }
+      ]
+    },
+    "database": {
+      "status": "healthy",
+      "tests": [
+        {
+          "name": "Write Operations",
+          "status": "PASS",
+          "message": "Database write successful",
+          "details": {
+            "isDatabaseMode": false,
+            "userCreated": true
+          },
+          "timestamp": "2025-08-13T18:29:53.532Z"
+        },
+        {
+          "name": "Read Operations",
+          "status": "PASS",
+          "message": "Database read successful",
+          "details": {
+            "isDatabaseMode": false,
+            "userRole": "admin"
+          },
+          "timestamp": "2025-08-13T18:29:53.693Z"
+        }
+      ]
+    },
+    "integration": {
+      "status": "healthy",
+      "tests": [
+        {
+          "name": "Frontend-Backend",
+          "status": "PASS",
+          "message": "Frontend successfully calls backend",
+          "details": {
+            "isDatabaseMode": false,
+            "responseTime": "389ms"
+          },
+          "timestamp": "2025-08-13T18:29:54.084Z"
+        },
+        {
+          "name": "Full Stack Flow",
+          "status": "WARN",
+          "message": "Partial integration",
+          "details": {
+            "statusCode": 200,
+            "response": {
+              "success": true,
+              "message": "تم إنشاء حساب تجريبي (قاعدة البيانات غير متصلة)",
+              "user": {
+                "_id": "1755109794312",
+                "id": "1755109794312",
+                "username": "fullstack1755109794085",
+                "email": "fullstack.1755109794085@integration.test",
+                "profile": {
+                  "firstName": "",
+                  "lastName": "",
+                  "bio": "",
+                  "avatar": ""
+                },
+                "stats": {
+                  "booksRead": 0,
+                  "reviewsWritten": 0,
+                  "averageRating": 0,
+                  "joinDate": "2025-08-13T18:29:54.667Z"
+                },
+                "isAdmin": false,
+                "role": "user",
+                "status": "active",
+                "favoriteGenres": []
+              },
+              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxNzU1MTA5Nzk0MzEyIiwiZW1haWwiOiJmdWxsc3RhY2suMTc1NTEwOTc5NDA4NUBpbnRlZ3JhdGlvbi50ZXN0IiwidXNlcm5hbWUiOiJmdWxsc3RhY2sxNzU1MTA5Nzk0MDg1IiwiaXNBZG1pbiI6ZmFsc2UsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU1MTA5Nzk0LCJleHAiOjE3NTU3MTQ1OTR9.BH28as-MdNgWrafGFSa4cMuKl2NQvJeBorYgorCVHZA",
+              "isDatabaseMode": false
+            }
+          },
+          "timestamp": "2025-08-13T18:29:54.954Z"
+        }
+      ]
+    }
+  }
+}
